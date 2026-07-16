@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Avatars" />
+    <x-common.page-breadcrumb pageTitle="Avatars" pageSubtitle="Komponen avatar untuk UI." />
     
     @php
         $avatarSrc = asset('images/user/user-01.jpg');

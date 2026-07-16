@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Alerts" />
+    <x-common.page-breadcrumb pageTitle="Alerts" pageSubtitle="Komponen notifikasi/peringatan untuk UI." />
 
     <div class="space-y-5 sm:space-y-6">
         {{-- Success Alert --}}

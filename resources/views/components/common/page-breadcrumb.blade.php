@@ -1,9 +1,16 @@
-@props(['pageTitle' => 'Page'])
+@props(['pageTitle' => 'Page', 'pageSubtitle' => ''])
 
 <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-    <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">
-        {{ $pageTitle }}
-    </h2>
+    <div>
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">
+            {{ $pageTitle }}
+        </h2>
+        @if($pageSubtitle)
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {{ $pageSubtitle }}
+            </p>
+        @endif
+    </div>
     <nav>
         <ol class="flex items-center gap-1.5">
             <li>

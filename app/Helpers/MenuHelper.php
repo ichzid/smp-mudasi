@@ -10,41 +10,32 @@ class MenuHelper
             [
                 'icon' => 'dashboard',
                 'name' => 'Dashboard',
-                'subItems' => [
-                    ['name' => 'Ecommerce', 'path' => '/'],
-                ],
-            ],
-            [
-                'icon' => 'calendar',
-                'name' => 'Calendar',
-                'path' => '/calendar',
+                'path' => '/',
             ],
             [
                 'icon' => 'user-profile',
-                'name' => 'User Profile',
-                'path' => '/profile',
+                'name' => 'Data Master',
+                'subItems' => [
+                    ['name' => 'Tahun Ajaran', 'path' => '/master/tahun-ajaran', 'pro' => false],
+                    ['name' => 'Guru', 'path' => '/master/guru', 'pro' => false],
+                    ['name' => 'Rombel', 'path' => '/master/rombel', 'pro' => false],
+                    ['name' => 'Siswa', 'path' => '/master/siswa', 'pro' => false],
+                ],
             ],
             [
-                'name' => 'Forms',
+                'icon' => 'task',
+                'name' => 'Kartu RFID',
+                'path' => '/kartu-rfid',
+            ],
+            [
+                'icon' => 'calendar',
+                'name' => 'Rombel Siswa',
+                'path' => '/rombel-siswa',
+            ],
+            [
                 'icon' => 'forms',
-                'subItems' => [
-                    ['name' => 'Form Elements', 'path' => '/form-elements', 'pro' => false],
-                ],
-            ],
-            [
-                'name' => 'Tables',
-                'icon' => 'tables',
-                'subItems' => [
-                    ['name' => 'Basic Tables', 'path' => '/basic-tables', 'pro' => false]
-                ],
-            ],
-            [
-                'name' => 'Pages',
-                'icon' => 'pages',
-                'subItems' => [
-                    ['name' => 'Blank Page', 'path' => '/blank', 'pro' => false],
-                    ['name' => '404 Error', 'path' => '/error-404', 'pro' => false]
-                ],
+                'name' => 'Presensi',
+                'path' => '/presensi',
             ],
         ];
     }
@@ -53,31 +44,11 @@ class MenuHelper
     {
         return [
             [
-                'icon' => 'charts',
-                'name' => 'Charts',
-                'subItems' => [
-                    ['name' => 'Line Chart', 'path' => '/line-chart', 'pro' => false],
-                    ['name' => 'Bar Chart', 'path' => '/bar-chart', 'pro' => false]
-                ],
-            ],
-            [
-                'icon' => 'ui-elements',
-                'name' => 'UI Elements',
-                'subItems' => [
-                    ['name' => 'Alerts', 'path' => '/alerts', 'pro' => false],
-                    ['name' => 'Avatar', 'path' => '/avatars', 'pro' => false],
-                    ['name' => 'Badge', 'path' => '/badge', 'pro' => false],
-                    ['name' => 'Buttons', 'path' => '/buttons', 'pro' => false],
-                    ['name' => 'Images', 'path' => '/image', 'pro' => false],
-                    ['name' => 'Videos', 'path' => '/videos', 'pro' => false],
-                ],
-            ],
-            [
                 'icon' => 'authentication',
                 'name' => 'Authentication',
                 'subItems' => [
-                    ['name' => 'Sign In', 'path' => '/signin', 'pro' => false],
-                    ['name' => 'Sign Up', 'path' => '/signup', 'pro' => false],
+                    ['name' => 'Profile', 'path' => '/profile', 'pro' => false],
+                    ['name' => 'Logout', 'path' => '/logout', 'pro' => false],
                 ],
             ],
         ];

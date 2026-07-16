@@ -21,7 +21,7 @@
 
 @section('content')
     {{-- Page Breadcrumb --}}
-    <x-common.page-breadcrumb :pageTitle="$currentPageTitle" />
+    <x-common.page-breadcrumb :pageTitle="$currentPageTitle" pageSubtitle="Komponen tombol untuk UI." />
 
     <div class="space-y-5 sm:space-y-6">
 

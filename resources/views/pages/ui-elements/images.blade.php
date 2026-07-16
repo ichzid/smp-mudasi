@@ -19,7 +19,7 @@
 
 @section('content')
     {{-- Page Breadcrumb --}}
-    <x-common.page-breadcrumb pageTitle="Images" />
+    <x-common.page-breadcrumb pageTitle="Images" pageSubtitle="Komponen gambar untuk UI." />
 
     <div class="space-y-5 sm:space-y-6">
 

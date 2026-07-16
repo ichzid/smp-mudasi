@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Line chart" />
+    <x-common.page-breadcrumb pageTitle="Line chart" pageSubtitle="Contoh komponen grafik line/garis." />
     <div class="space-y-6">
         <x-common.component-card title="Line chart 1">
             <!-- ====== Line Chart One Start -->

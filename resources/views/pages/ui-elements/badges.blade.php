@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Badges" />
+    <x-common.page-breadcrumb pageTitle="Badges" pageSubtitle="Komponen lencana untuk UI." />
 
     @php
         use Illuminate\Support\HtmlString;

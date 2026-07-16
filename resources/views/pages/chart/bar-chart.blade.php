@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Bar chart" />
+    <x-common.page-breadcrumb pageTitle="Bar chart" pageSubtitle="Contoh komponen grafik batang." />
     <div class="space-y-6">
         <x-common.component-card title="Bar chart 1">
             <!-- ====== Bar Chart One Start -->

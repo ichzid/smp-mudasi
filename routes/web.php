@@ -2,12 +2,33 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Master\SiswaController;
+use App\Http\Controllers\Master\TahunAjaranController;
+use App\Http\Controllers\Master\GuruController;
+use App\Http\Controllers\Master\RombelController;
+use App\Http\Controllers\KartuRfidController;
+use App\Http\Controllers\RombelSiswaController;
+use App\Http\Controllers\PresensiController;
 
 // dashboard pages
-Route::get('/', function () {
-    return view('pages.dashboard.ecommerce', ['title' => 'E-commerce Dashboard']);
-})->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+// CRUD Data Master Routes
+Route::prefix('master')->name('master.')->group(function () {
+    Route::resource('siswa', SiswaController::class);
+    Route::resource('tahun-ajaran', TahunAjaranController::class);
+    Route::resource('guru', GuruController::class);
+    Route::resource('rombel', RombelController::class);
+});
+
+// Other main features
+Route::resource('kartu-rfid', KartuRfidController::class);
+Route::resource('rombel-siswa', RombelSiswaController::class)->except(['show', 'edit', 'update']);
+Route::resource('presensi', PresensiController::class)->except(['create', 'show', 'edit', 'update', 'destroy']);
+
+
+
+// ini adalah template pages
 // calender pages
 Route::get('/calendar', function () {
     return view('pages.calender', ['title' => 'Calendar']);
