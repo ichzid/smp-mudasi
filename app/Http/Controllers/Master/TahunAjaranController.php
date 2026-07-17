@@ -32,16 +32,15 @@ class TahunAjaranController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'tahun_mulai' => 'required|integer|min:2020|max:2100',
-            'tahun_selesai' => 'required|integer|min:2020|max:2100|gte:tahun_mulai',
-            'semester' => 'required|in:ganjil,genap',
-            'status' => 'required|in:aktif,nonaktif',
+            'nama' => 'required|string|max:50',
+            'semester' => 'required|in:1,2',
+            'is_aktif' => 'required|boolean',
         ]);
 
         DB::beginTransaction();
         try {
-            if ($validated['status'] == 'aktif') {
-                TahunAjaran::where('status', 'aktif')->update(['status' => 'nonaktif']);
+            if ($validated['is_aktif']) {
+                TahunAjaran::where('is_aktif', true)->update(['is_aktif' => false]);
             }
 
             TahunAjaran::create($validated);
@@ -79,16 +78,15 @@ class TahunAjaranController extends Controller
         $tahunAjaran = TahunAjaran::findOrFail($id);
 
         $validated = $request->validate([
-            'tahun_mulai' => 'required|integer|min:2020|max:2100',
-            'tahun_selesai' => 'required|integer|min:2020|max:2100|gte:tahun_mulai',
-            'semester' => 'required|in:ganjil,genap',
-            'status' => 'required|in:aktif,nonaktif',
+            'nama' => 'required|string|max:50',
+            'semester' => 'required|in:1,2',
+            'is_aktif' => 'required|boolean',
         ]);
 
         DB::beginTransaction();
         try {
-            if ($validated['status'] == 'aktif' && $tahunAjaran->status != 'aktif') {
-                TahunAjaran::where('id', '!=', $id)->where('status', 'aktif')->update(['status' => 'nonaktif']);
+            if ($validated['is_aktif'] && !$tahunAjaran->is_aktif) {
+                TahunAjaran::where('id', '!=', $id)->where('is_aktif', true)->update(['is_aktif' => false]);
             }
 
             $tahunAjaran->update($validated);
@@ -108,7 +106,7 @@ class TahunAjaranController extends Controller
     {
         $tahunAjaran = TahunAjaran::findOrFail($id);
         
-        if ($tahunAjaran->status == 'aktif') {
+        if ($tahunAjaran->is_aktif) {
             return redirect()->route('master.tahun-ajaran.index')->with('error', 'Tidak dapat menghapus tahun ajaran yang sedang aktif.');
         }
 

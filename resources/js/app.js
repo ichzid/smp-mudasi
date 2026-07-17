@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             // Styling for Tailwind CSS integration
             dom: '<"flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-800 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-800 gap-4"ip>',
+            pagingType: "simple_numbers",
             initComplete: function() {
                 // Apply Tailwind CSS classes to DataTables elements
                 $('.dataTables_filter input').addClass('dark:bg-dark-900 focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-9 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-1.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90');

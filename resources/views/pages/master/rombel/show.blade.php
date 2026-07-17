@@ -3,7 +3,13 @@
 @section('content')
     <div class="space-y-6">
         <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Detail Data Rombel" pageSubtitle="Informasi lengkap detail rombongan belajar." />
+        <x-common.page-breadcrumb 
+            pageTitle="Detail Data Rombel" 
+            pageSubtitle="Informasi lengkap detail rombongan belajar." 
+            :breadcrumbs="[
+                ['label' => 'Data Rombel', 'url' => route('master.rombel.index')]
+            ]"
+        />
 
         <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <div class="p-6 sm:p-8">
@@ -25,7 +31,7 @@
                         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Tahun Ajaran</h4>
                         <div class="flex items-center gap-2">
                             <p class="text-base text-gray-900 dark:text-white font-medium">
-                                {{ $rombel->tahunAjaran->tahun_mulai }}/{{ $rombel->tahunAjaran->tahun_selesai }} - {{ ucfirst($rombel->tahunAjaran->semester) }}
+                                {{ $rombel->tahunAjaran->nama }} - Semester {{ $rombel->tahunAjaran->semester == 1 ? 'Ganjil' : 'Genap' }}
                             </p>
                             @if($rombel->tahunAjaran->status == 'aktif')
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
@@ -39,8 +45,8 @@
                         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Wali Kelas</h4>
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                                @if($rombel->waliKelas->foto)
-                                    <img src="{{ Storage::url($rombel->waliKelas->foto) }}" alt="{{ $rombel->waliKelas->nama_lengkap }}" class="w-full h-full object-cover">
+                                @if($rombel->waliGuru && $rombel->waliGuru->foto)
+                                    <img src="{{ Storage::url($rombel->waliGuru->foto) }}" alt="{{ $rombel->waliGuru->nama_lengkap }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-gray-500">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,10 +57,10 @@
                             </div>
                             <div>
                                 <p class="text-base text-gray-900 dark:text-white font-medium">
-                                    {{ $rombel->waliKelas->nama_lengkap }}
+                                    {{ optional($rombel->waliGuru)->nama_lengkap ?? 'Belum ada Wali Kelas' }}
                                 </p>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    NIP: {{ $rombel->waliKelas->nip ?: '-' }}
+                                    NIP. {{ optional($rombel->waliGuru)->nip ?: '-' }}
                                 </p>
                             </div>
                         </div>

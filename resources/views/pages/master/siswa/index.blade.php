@@ -55,8 +55,8 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                            @if($siswa->foto)
-                                                <img src="{{ Storage::url($siswa->foto) }}" alt="{{ $siswa->nama_lengkap }}" class="w-full h-full object-cover">
+                                            @if($siswa->foto_url)
+                                                <img src="{{ Storage::url($siswa->foto_url) }}" alt="{{ $siswa->nama_lengkap }}" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center text-gray-500">
                                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

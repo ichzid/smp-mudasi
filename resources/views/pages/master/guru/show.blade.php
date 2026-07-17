@@ -3,7 +3,13 @@
 @section('content')
     <div class="space-y-6">
         <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Detail Data Guru" pageSubtitle="Informasi lengkap profil guru." />
+        <x-common.page-breadcrumb 
+            pageTitle="Detail Data Guru" 
+            pageSubtitle="Informasi lengkap profil guru." 
+            :breadcrumbs="[
+                ['label' => 'Data Guru', 'url' => route('master.guru.index')]
+            ]"
+        />
 
         <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <div class="p-6 sm:p-8">
@@ -59,7 +65,7 @@
                                     <div class="mt-2 flex flex-wrap gap-2">
                                         @foreach($guru->rombel as $r)
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
-                                                Kelas {{ $r->tingkat }} ({{ $r->nama_rombel }}) - TA {{ $r->tahunAjaran->tahun_mulai }}/{{ $r->tahunAjaran->tahun_selesai }}
+                                                Kelas {{ $r->tingkat }} ({{ $r->nama_rombel }}) - TA {{ $r->tahunAjaran->nama }}
                                             </span>
                                         @endforeach
                                     </div>

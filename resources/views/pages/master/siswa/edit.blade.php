@@ -3,7 +3,13 @@
 @section('content')
     <div class="space-y-6">
         <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Edit Data Siswa" pageSubtitle="Perbarui informasi data siswa." />
+        <x-common.page-breadcrumb 
+            pageTitle="Edit Data Siswa" 
+            pageSubtitle="Perbarui informasi data siswa." 
+            :breadcrumbs="[
+                ['label' => 'Data Siswa', 'url' => route('master.siswa.index')]
+            ]"
+        />
 
         <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-8 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <form action="{{ route('master.siswa.update', $siswa->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
@@ -85,16 +91,16 @@
                     
                     <!-- Foto -->
                     <div>
-                        <label for="foto" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Foto Siswa</label>
-                        @if($siswa->foto)
+                        <label for="foto_url" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Foto Siswa</label>
+                        @if($siswa->foto_url)
                             <div class="mb-3 flex items-center justify-center w-32 h-32 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800">
-                                <img src="{{ Storage::url($siswa->foto) }}" alt="{{ $siswa->nama_lengkap }}" class="w-full h-full object-cover">
+                                <img src="{{ Storage::url($siswa->foto_url) }}" alt="{{ $siswa->nama_lengkap }}" class="w-full h-full object-cover">
                             </div>
                         @endif
-                        <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/jpg"
+                        <input type="file" id="foto_url" name="foto_url" accept="image/jpeg,image/png,image/jpg"
                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-brand-900 dark:file:text-brand-300">
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Format: JPG, JPEG, PNG. Max: 2MB. Biarkan kosong jika tidak ingin mengubah foto.</p>
-                        @error('foto')
+                        @error('foto_url')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>

@@ -44,12 +44,14 @@ class MenuHelper
     {
         return [
             [
+                'icon' => 'user-profile',
+                'name' => 'Profile',
+                'path' => '/profile',
+            ],
+            [
                 'icon' => 'authentication',
-                'name' => 'Authentication',
-                'subItems' => [
-                    ['name' => 'Profile', 'path' => '/profile', 'pro' => false],
-                    ['name' => 'Logout', 'path' => '/logout', 'pro' => false],
-                ],
+                'name' => 'Logout',
+                'path' => '/logout',
             ],
         ];
     }

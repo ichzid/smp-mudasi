@@ -45,9 +45,9 @@ class KartuRfidController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'siswa_id' => 'required|exists:siswas,id|unique:kartu_rfids,siswa_id',
-            'kode_uid' => 'required|string|unique:kartu_rfids,kode_uid',
-            'status' => 'required|in:aktif,nonaktif,hilang',
+            'siswa_id' => 'required|exists:siswa,id|unique:kartu_rfid,siswa_id',
+            'kode_uid' => 'required|string|unique:kartu_rfid,kode_uid',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
         
         $validated['diterbitkan_pada'] = now();
@@ -83,8 +83,8 @@ class KartuRfidController extends Controller
         $kartu = KartuRfid::findOrFail($id);
         
         $validated = $request->validate([
-            'kode_uid' => 'required|string|unique:kartu_rfids,kode_uid,' . $kartu->id,
-            'status' => 'required|in:aktif,nonaktif,hilang',
+            'kode_uid' => 'required|string|unique:kartu_rfid,kode_uid,' . $kartu->id,
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
         $kartu->update($validated);

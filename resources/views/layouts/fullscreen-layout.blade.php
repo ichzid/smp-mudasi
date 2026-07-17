@@ -20,9 +20,8 @@
             Alpine.store('theme', {
                 init() {
                     const savedTheme = localStorage.getItem('theme');
-                    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' :
-                        'light';
-                    this.theme = savedTheme || systemTheme;
+                    // Menggunakan light theme sebagai default jika tidak ada cache, mengabaikan systemTheme
+                    this.theme = savedTheme || 'light';
                     this.updateTheme();
                 },
                 theme: 'light',
@@ -79,8 +78,7 @@
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const theme = savedTheme || systemTheme;
+            const theme = savedTheme || 'light';
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.body.classList.add('dark', 'bg-gray-900');

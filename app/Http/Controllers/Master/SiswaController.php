@@ -32,8 +32,8 @@ class SiswaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nisn' => 'required|string|unique:siswas,nisn',
-            'nis' => 'required|string|unique:siswas,nis',
+            'nisn' => 'required|string|unique:siswa,nisn',
+            'nis' => 'required|string|unique:siswa,nis',
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
             'tempat_lahir' => 'nullable|string',
@@ -41,12 +41,12 @@ class SiswaController extends Controller
             'alamat' => 'nullable|string',
             'nama_wali' => 'nullable|string',
             'no_hp_wali' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('foto_siswa', 'public');
-            $validated['foto'] = $fotoPath;
+        if ($request->hasFile('foto_url')) {
+            $fotoPath = $request->file('foto_url')->store('foto_siswa', 'public');
+            $validated['foto_url'] = $fotoPath;
         }
 
         Siswa::create($validated);
@@ -80,8 +80,8 @@ class SiswaController extends Controller
         $siswa = Siswa::findOrFail($id);
 
         $validated = $request->validate([
-            'nisn' => 'required|string|unique:siswas,nisn,' . $siswa->id,
-            'nis' => 'required|string|unique:siswas,nis,' . $siswa->id,
+            'nisn' => 'required|string|unique:siswa,nisn,' . $siswa->id,
+            'nis' => 'required|string|unique:siswa,nis,' . $siswa->id,
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
             'tempat_lahir' => 'nullable|string',
@@ -89,15 +89,15 @@ class SiswaController extends Controller
             'alamat' => 'nullable|string',
             'nama_wali' => 'nullable|string',
             'no_hp_wali' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        if ($request->hasFile('foto')) {
-            if ($siswa->foto && Storage::disk('public')->exists($siswa->foto)) {
-                Storage::disk('public')->delete($siswa->foto);
+        if ($request->hasFile('foto_url')) {
+            if ($siswa->foto_url && Storage::disk('public')->exists($siswa->foto_url)) {
+                Storage::disk('public')->delete($siswa->foto_url);
             }
-            $fotoPath = $request->file('foto')->store('foto_siswa', 'public');
-            $validated['foto'] = $fotoPath;
+            $fotoPath = $request->file('foto_url')->store('foto_siswa', 'public');
+            $validated['foto_url'] = $fotoPath;
         }
 
         $siswa->update($validated);
@@ -112,8 +112,8 @@ class SiswaController extends Controller
     {
         $siswa = Siswa::findOrFail($id);
         
-        if ($siswa->foto && Storage::disk('public')->exists($siswa->foto)) {
-            Storage::disk('public')->delete($siswa->foto);
+        if ($siswa->foto_url && Storage::disk('public')->exists($siswa->foto_url)) {
+            Storage::disk('public')->delete($siswa->foto_url);
         }
 
         $siswa->delete();

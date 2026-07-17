@@ -2,8 +2,14 @@
 
 @section('content')
     <div class="space-y-6">
-        <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Tambah Data Rombel" pageSubtitle="Tambahkan rombongan belajar baru ke dalam sistem." />
+            <!-- Breadcrumb -->
+        <x-common.page-breadcrumb 
+            pageTitle="Tambah Data Rombel" 
+            pageSubtitle="Tambahkan rombongan belajar baru ke dalam sistem." 
+            :breadcrumbs="[
+                ['label' => 'Data Rombel', 'url' => route('master.rombel.index')]
+            ]"
+        />
 
         <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-8 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <form action="{{ route('master.rombel.store') }}" method="POST" class="space-y-6">
@@ -19,8 +25,8 @@
                                 :class="isOptionSelected && 'text-gray-800 dark:text-white/90'" @change="isOptionSelected = true">
                                 <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Tahun Ajaran</option>
                                 @foreach($tahun_ajarans as $ta)
-                                    <option value="{{ $ta->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('tahun_ajaran_id') == $ta->id || ($ta->status == 'aktif' && !old('tahun_ajaran_id')) ? 'selected' : '' }}>
-                                        {{ $ta->tahun_mulai }}/{{ $ta->tahun_selesai }} - {{ ucfirst($ta->semester) }}
+                                    <option value="{{ $ta->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('tahun_ajaran_id') == $ta->id || ($ta->is_aktif && !old('tahun_ajaran_id')) ? 'selected' : '' }}>
+                                        {{ $ta->nama }} - Semester {{ $ta->semester == 1 ? 'Ganjil' : 'Genap' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -43,9 +49,9 @@
                                 class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                                 :class="isOptionSelected && 'text-gray-800 dark:text-white/90'" @change="isOptionSelected = true">
                                 <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Tingkat</option>
-                                <option value="7" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('tingkat') == '7' ? 'selected' : '' }}>Kelas 7</option>
-                                <option value="8" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('tingkat') == '8' ? 'selected' : '' }}>Kelas 8</option>
-                                <option value="9" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('tingkat') == '9' ? 'selected' : '' }}>Kelas 9</option>
+                                <option value="VII" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('tingkat') == 'VII' ? 'selected' : '' }}>Kelas 7</option>
+                                <option value="VIII" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('tingkat') == 'VIII' ? 'selected' : '' }}>Kelas 8</option>
+                                <option value="IX" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('tingkat') == 'IX' ? 'selected' : '' }}>Kelas 9</option>
                             </select>
                             <span class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                                 <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -60,24 +66,24 @@
 
                     <!-- Nama Rombel -->
                     <div>
-                        <label for="nama_rombel" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Nama Rombel <span class="text-red-500">*</span></label>
-                        <input type="text" id="nama_rombel" name="nama_rombel" value="{{ old('nama_rombel') }}" required placeholder="Contoh: 7A, 8B, 9-Alpha"
+                        <label for="nama" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Nama Rombel <span class="text-red-500">*</span></label>
+                        <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required placeholder="Contoh: 7A, 8B, 9-Alpha"
                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
-                        @error('nama_rombel')
+                        @error('nama')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Wali Kelas -->
                     <div>
-                        <label for="wali_kelas_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Wali Kelas <span class="text-red-500">*</span></label>
+                        <label for="wali_guru_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Wali Kelas <span class="text-red-500">*</span></label>
                         <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
-                            <select id="wali_kelas_id" name="wali_kelas_id" required
+                            <select id="wali_guru_id" name="wali_guru_id" required
                                 class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                                 :class="isOptionSelected && 'text-gray-800 dark:text-white/90'" @change="isOptionSelected = true">
                                 <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Wali Kelas</option>
                                 @foreach($gurus as $guru)
-                                    <option value="{{ $guru->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('wali_kelas_id') == $guru->id ? 'selected' : '' }}>
+                                    <option value="{{ $guru->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('wali_guru_id') == $guru->id ? 'selected' : '' }}>
                                         {{ $guru->nama_lengkap }} ({{ $guru->nip ?: 'Non-NIP' }})
                                     </option>
                                 @endforeach
@@ -88,7 +94,7 @@
                                 </svg>
                             </span>
                         </div>
-                        @error('wali_kelas_id')
+                        @error('wali_guru_id')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>

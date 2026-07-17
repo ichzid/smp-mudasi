@@ -3,7 +3,13 @@
 @section('content')
     <div class="space-y-6">
         <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Tambah Kartu RFID" pageSubtitle="Hubungkan kartu RFID baru untuk siswa." />
+        <x-common.page-breadcrumb 
+            pageTitle="Tambah Kartu RFID" 
+            pageSubtitle="Hubungkan kartu RFID baru untuk siswa." 
+            :breadcrumbs="[
+                ['label' => 'Data Kartu RFID', 'url' => route('kartu-rfid.index')]
+            ]"
+        />
 
         <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-8 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <form action="{{ route('kartu-rfid.store') }}" method="POST" class="space-y-6">
@@ -62,7 +68,6 @@
                                 @change="isOptionSelected = true">
                                 <option value="aktif" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('status', 'aktif') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                                 <option value="nonaktif" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('status') == 'nonaktif' ? 'selected' : '' }}>Non-aktif</option>
-                                <option value="hilang" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('status') == 'hilang' ? 'selected' : '' }}>Hilang</option>
                             </select>
                             <span class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                                 <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

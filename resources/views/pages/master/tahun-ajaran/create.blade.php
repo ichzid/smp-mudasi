@@ -3,29 +3,25 @@
 @section('content')
     <div class="space-y-6">
         <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Tambah Tahun Ajaran" pageSubtitle="Tambahkan periode tahun ajaran baru." />
+        <x-common.page-breadcrumb 
+            pageTitle="Tambah Tahun Ajaran" 
+            pageSubtitle="Tambahkan periode tahun ajaran baru." 
+            :breadcrumbs="[
+                ['label' => 'Data Tahun Ajaran', 'url' => route('master.tahun-ajaran.index')]
+            ]" 
+        />
 
         <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-8 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <form action="{{ route('master.tahun-ajaran.store') }}" method="POST" class="space-y-6">
                 @csrf
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tahun Mulai -->
+                <div class="grid grid-cols-1 gap-6">
+                    <!-- Nama Tahun Ajaran -->
                     <div>
-                        <label for="tahun_mulai" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tahun Mulai <span class="text-red-500">*</span></label>
-                        <input type="number" id="tahun_mulai" name="tahun_mulai" value="{{ old('tahun_mulai', date('Y')) }}" required min="2020" max="2100"
+                        <label for="nama" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tahun Ajaran <span class="text-red-500">*</span></label>
+                        <input type="text" id="nama" name="nama" value="{{ old('nama', date('Y') . '/' . (date('Y') + 1)) }}" required placeholder="Contoh: 2024/2025"
                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-                        @error('tahun_mulai')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Tahun Selesai -->
-                    <div>
-                        <label for="tahun_selesai" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tahun Selesai <span class="text-red-500">*</span></label>
-                        <input type="number" id="tahun_selesai" name="tahun_selesai" value="{{ old('tahun_selesai', date('Y') + 1) }}" required min="2020" max="2100"
-                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-                        @error('tahun_selesai')
+                        @error('nama')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
@@ -37,8 +33,8 @@
                             <select id="semester" name="semester" required
                                 class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800 dark:text-white/90"
                                 @change="isOptionSelected = true">
-                                <option value="ganjil" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('semester') == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
-                                <option value="genap" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('semester') == 'genap' ? 'selected' : '' }}>Genap</option>
+                                <option value="1" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('semester') == '1' ? 'selected' : '' }}>Ganjil (1)</option>
+                                <option value="2" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('semester') == '2' ? 'selected' : '' }}>Genap (2)</option>
                             </select>
                             <span class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                                 <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -53,13 +49,13 @@
 
                     <!-- Status -->
                     <div>
-                        <label for="status" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Status <span class="text-red-500">*</span></label>
+                        <label for="is_aktif" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Status <span class="text-red-500">*</span></label>
                         <div x-data="{ isOptionSelected: true }" class="relative z-20 bg-transparent">
-                            <select id="status" name="status" required
+                            <select id="is_aktif" name="is_aktif" required
                                 class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800 dark:text-white/90"
                                 @change="isOptionSelected = true">
-                                <option value="aktif" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif (Set Aktif & Nonaktifkan yang lama)</option>
-                                <option value="nonaktif" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('status', 'nonaktif') == 'nonaktif' ? 'selected' : '' }}>Non-aktif</option>
+                                <option value="1" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('is_aktif') == '1' ? 'selected' : '' }}>Aktif (Set Aktif & Nonaktifkan yang lama)</option>
+                                <option value="0" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('is_aktif', '0') == '0' ? 'selected' : '' }}>Non-aktif</option>
                             </select>
                             <span class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-500 dark:text-gray-400">
                                 <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -67,7 +63,7 @@
                                 </svg>
                             </span>
                         </div>
-                        @error('status')
+                        @error('is_aktif')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>

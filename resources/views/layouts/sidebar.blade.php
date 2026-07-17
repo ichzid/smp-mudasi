@@ -24,7 +24,9 @@
                         // Check if any submenu item matches current path
                         @foreach ($item['subItems'] as $subItem)
                             if (currentPath === '{{ ltrim($subItem['path'], '/') }}' ||
-                                window.location.pathname === '{{ $subItem['path'] }}') {
+                                ( '{{ ltrim($subItem['path'], '/') }}' !== '' && currentPath.startsWith('{{ ltrim($subItem['path'], '/') }}/') ) ||
+                                window.location.pathname === '{{ $subItem['path'] }}' ||
+                                ( '{{ $subItem['path'] }}' !== '/' && window.location.pathname.startsWith('{{ $subItem['path'] }}/') )) {
                                 this.openSubmenus['{{ $groupIndex }}-{{ $itemIndex }}'] = true;
                             } @endforeach
             @endif
@@ -47,7 +49,12 @@
             return this.openSubmenus[key] || false;
         },
         isActive(path) {
-            return window.location.pathname === path || '{{ $currentPath }}' === path.replace(/^\//, '');
+            const currentPath = '{{ $currentPath }}';
+            const cleanPath = path.replace(/^\//, '');
+            return window.location.pathname === path || 
+                   (path !== '/' && window.location.pathname.startsWith(path + '/')) || 
+                   currentPath === cleanPath || 
+                   (cleanPath !== '' && currentPath.startsWith(cleanPath + '/'));
         }
     }"
     :class="{
@@ -217,10 +224,7 @@
             </div>
         </nav>
 
-        <!-- Sidebar Widget -->
-        <div x-data x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen" x-transition class="mt-auto">
-            @include('layouts.sidebar-widget')
-        </div>
+        <!-- Sidebar Widget dihilangkan -->
 
     </div>
 </aside>

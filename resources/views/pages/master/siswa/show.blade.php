@@ -3,7 +3,13 @@
 @section('content')
     <div class="space-y-6">
         <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Detail Data Siswa" pageSubtitle="Informasi lengkap profil dan kontak wali siswa." />
+        <x-common.page-breadcrumb 
+            pageTitle="Detail Data Siswa" 
+            pageSubtitle="Informasi lengkap profil dan kontak wali siswa." 
+            :breadcrumbs="[
+                ['label' => 'Data Siswa', 'url' => route('master.siswa.index')]
+            ]"
+        />
 
         <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <div class="p-6 sm:p-8">
@@ -11,9 +17,9 @@
                     <!-- Foto Profil -->
                     <div class="flex-shrink-0 flex flex-col items-center">
                         <div class="w-48 h-48 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-4 border-white shadow-lg dark:border-gray-700">
-                            @if($siswa->foto)
-                                <img src="{{ Storage::url($siswa->foto) }}" alt="{{ $siswa->nama_lengkap }}" class="w-full h-full object-cover">
-                            @else
+                            @if($siswa->foto_url)
+                                <img src="{{ Storage::url($siswa->foto_url) }}" alt="{{ $siswa->nama_lengkap }}" class="w-full h-full object-cover">
+                                @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
                                     <svg class="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>

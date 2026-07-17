@@ -3,7 +3,14 @@
 @section('content')
     <div class="space-y-6">
         <!-- Greetings -->
-        <x-common.page-breadcrumb pageTitle="Selamat Datang di Sistem Informasi Sekolah" pageSubtitle="Ringkasan data dan aktivitas hari ini: {{ \Carbon\Carbon::parse($today)->format('l, d F Y') }}" />
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    Selamat Datang di Sistem Informasi Sekolah
+                </h2>
+                <p class="text-sm text-gray-500 mt-1 dark:text-gray-400">Ringkasan data dan aktivitas hari ini: {{ \Carbon\Carbon::parse($today)->format('l, d F Y') }}</p>
+            </div>
+        </div>
         
         <div class="flex justify-end mb-4">
             <a href="{{ route('presensi.index') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all">

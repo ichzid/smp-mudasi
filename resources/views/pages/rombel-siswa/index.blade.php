@@ -40,9 +40,9 @@
                             onchange="document.getElementById('rombel_id').value=''; this.form.submit()" @change="isOptionSelected = true">
                             <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Tahun Ajaran</option>
                             @foreach($tahun_ajarans as $ta)
-                                <option value="{{ $ta->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $tahun_ajaran_id == $ta->id ? 'selected' : '' }}>
-                                    {{ $ta->tahun_mulai }}/{{ $ta->tahun_selesai }} - {{ ucfirst($ta->semester) }}
-                                    @if($ta->status == 'aktif') (Aktif) @endif
+                                <option value="{{ $ta->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $tahun_ajaran_id == $ta->id || (empty($tahun_ajaran_id) && $ta->is_aktif) ? 'selected' : '' }}>
+                                    {{ $ta->nama }} - Semester {{ $ta->semester == 1 ? 'Ganjil' : 'Genap' }}
+                                    {{ $ta->is_aktif ? '(Aktif)' : '' }}
                                 </option>
                             @endforeach
                         </select>

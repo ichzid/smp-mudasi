@@ -39,6 +39,16 @@ Route::get('/profile', function () {
     return view('pages.profile', ['title' => 'Profile']);
 })->name('profile');
 
+// logout routing (temporary simple redirect to home or login page)
+Route::post('/logout', function () {
+    // Auth::logout();
+    return redirect('/');
+})->name('logout');
+Route::get('/logout', function () {
+    // Auth::logout();
+    return redirect('/');
+});
+
 // form pages
 Route::get('/form-elements', function () {
     return view('pages.form.form-elements', ['title' => 'Form Elements']);

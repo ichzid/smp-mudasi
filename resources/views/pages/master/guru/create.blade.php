@@ -3,7 +3,13 @@
 @section('content')
     <div class="space-y-6">
         <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Tambah Data Guru" pageSubtitle="Tambahkan data guru baru ke dalam sistem." />
+        <x-common.page-breadcrumb 
+            pageTitle="Tambah Data Guru" 
+            pageSubtitle="Tambahkan data guru baru ke dalam sistem." 
+            :breadcrumbs="[
+                ['label' => 'Data Guru', 'url' => route('master.guru.index')]
+            ]"
+        />
 
         <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-8 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <form action="{{ route('master.guru.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">

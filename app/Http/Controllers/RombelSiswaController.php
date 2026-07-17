@@ -30,7 +30,7 @@ class RombelSiswaController extends Controller
         if ($rombel_id) {
             $rombel_siswas = RombelSiswa::with(['siswa', 'rombel.tahunAjaran'])
                                         ->where('rombel_id', $rombel_id)
-                                        ->orderBy(Siswa::select('nama_lengkap')->whereColumn('siswas.id', 'rombel_siswas.siswa_id'))
+                                        ->orderBy(Siswa::select('nama_lengkap')->whereColumn('siswa.id', 'rombel_siswa.siswa_id'))
                                         ->get();
         }
 
@@ -61,9 +61,9 @@ class RombelSiswaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'rombel_id' => 'required|exists:rombels,id',
+            'rombel_id' => 'required|exists:rombel,id',
             'siswa_id' => 'required|array',
-            'siswa_id.*' => 'exists:siswas,id',
+            'siswa_id.*' => 'exists:siswa,id',
             'tanggal_masuk' => 'required|date'
         ]);
 

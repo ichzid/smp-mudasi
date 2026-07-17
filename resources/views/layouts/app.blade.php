@@ -32,25 +32,29 @@
             color: #9ca3af !important; /* text-gray-400 */
         }
         
+        /* Search and Length inputs match TailAdmin forms */
         .dataTables_filter input {
             border-radius: 0.5rem !important; /* rounded-lg */
             border: 1px solid #d1d5db !important; /* border-gray-300 */
-            padding: 0.5rem 0.75rem !important; /* py-2 px-3 */
+            padding: 0.5rem 1rem !important; /* Lebih lega seperti input TailAdmin */
             font-size: 0.875rem !important; /* text-sm */
             line-height: 1.25rem !important;
             outline: none !important;
             background-color: transparent !important;
             margin-left: 0.5rem !important;
+            transition: all 0.2s;
+            box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05) !important; /* shadow-theme-xs */
         }
         
         .dark .dataTables_filter input {
             border-color: #374151 !important; /* border-gray-700 */
             color: #f3f4f6 !important; /* text-gray-100 */
+            background-color: #1a2231 !important; /* bg-gray-dark */
         }
         
         .dataTables_filter input:focus {
-            border-color: #3b82f6 !important; /* focus:border-blue-500 */
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+            border-color: #465fff !important; /* focus:border-brand-500 */
+            box-shadow: 0px 0px 0px 4px rgba(70, 95, 255, 0.12) !important; /* shadow-focus-ring TailAdmin */
         }
 
         /* Style Length Menu (Show X entries) */
@@ -78,67 +82,122 @@
             font-size: 0.875rem !important;
             outline: none !important;
             background-color: transparent !important;
+            transition: all 0.2s;
+            box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05) !important;
         }
         
         .dark .dataTables_length select {
             border-color: #374151 !important;
             color: #f3f4f6 !important;
+            background-color: #1a2231 !important;
         }
         
         .dataTables_length select:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+            border-color: #465fff !important;
+            box-shadow: 0px 0px 0px 4px rgba(70, 95, 255, 0.12) !important;
         }
 
-        /* Pagination Styles */
+        /* Pagination Container Fixes */
+        div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .dataTables_wrapper .dataTables_paginate span {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .dataTables_wrapper .dataTables_paginate {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.25rem;
+        }
+
+        /* Pagination Button Base Styling */
         .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.375rem 0.75rem !important;
-            margin-left: 0.25rem !important;
-            border-radius: 0.375rem !important;
-            border: 1px solid transparent !important;
-            font-size: 0.875rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 32px !important;
+            height: 32px !important;
+            padding: 0 8px !important;
+            margin: 0 !important;
+            border-radius: 8px !important; /* Diubah menjadi rounded-lg untuk mengikuti border TailAdmin */
+            border: 1px solid #e5e7eb !important; /* border-gray-200 */
+            font-size: 13px !important;
             font-weight: 500 !important;
-            color: #374151 !important;
-            background: transparent !important;
+            color: #4b5563 !important; /* text-gray-600 */
+            background: #ffffff !important;
+            transition: all 0.2s;
+            cursor: pointer !important;
+            text-decoration: none !important;
         }
         
         .dark .dataTables_wrapper .dataTables_paginate .paginate_button {
-            color: #9ca3af !important;
+            color: #9ca3af !important; /* text-gray-400 */
+            background: transparent !important;
+            border-color: #1f2937 !important; /* border-gray-800 - Disesuaikan dengan TailAdmin */
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            color: #111827 !important;
-            background: #f3f4f6 !important; /* bg-gray-100 */
-            border-color: #e5e7eb !important;
+            color: #111827 !important; /* text-gray-900 */
+            background: #f3f4f6 !important; /* bg-gray-100 - Mengikuti tema abu TailAdmin */
+            border-color: #d1d5db !important; /* border-gray-300 */
         }
         
         .dark .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            color: #f3f4f6 !important;
-            background: #374151 !important; /* bg-gray-700 */
-            border-color: #4b5563 !important;
+            color: #f3f4f6 !important; /* text-gray-100 */
+            background: rgba(255, 255, 255, 0.05) !important; /* Transparansi ringan */
+            border-color: #374151 !important; /* border-gray-700 */
         }
 
+        /* Current/Active Page Styling */
         .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
         .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-            color: #2563eb !important; /* text-blue-600 */
-            background: #eff6ff !important; /* bg-blue-50 */
-            border-color: #bfdbfe !important; /* border-blue-200 */
+            color: #ffffff !important;
+            background: #465fff !important; /* bg-brand-500 dari theme TailAdmin */
+            border-color: #465fff !important;
+            box-shadow: 0px 4px 12px -2px rgba(70, 95, 255, 0.25) !important; /* Drop shadow khusus tombol brand TailAdmin */
         }
         
         .dark .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
         .dark .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-            color: #60a5fa !important; /* text-blue-400 */
-            background: rgba(37, 99, 235, 0.1) !important;
-            border-color: rgba(59, 130, 246, 0.2) !important;
+            color: #ffffff !important;
+            background: #465fff !important;
+            border-color: #465fff !important;
+            box-shadow: 0px 4px 12px -2px rgba(70, 95, 255, 0.25) !important;
         }
         
         .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
         .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
         .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active {
             color: #9ca3af !important;
-            background: transparent !important;
-            border-color: transparent !important;
+            background: #f9fafb !important;
+            border-color: #e5e7eb !important;
             cursor: not-allowed !important;
+            box-shadow: none !important;
+        }
+        
+        .dark .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dark .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
+        .dark .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active {
+            color: #4b5563 !important;
+            background: transparent !important;
+            border-color: #374151 !important;
+        }
+
+        /* Previous/Next Button Specific Styles */
+        .dataTables_wrapper .dataTables_paginate .paginate_button.previous,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.next {
+            min-width: unset !important;
+            padding: 0 12px !important;
+            font-size: 13px !important;
         }
 
         /* Info Text */
@@ -190,6 +249,15 @@
         table.dataTable thead .sorting_desc::after {
             opacity: 1 !important;
         }
+        /* Tabel Body Text Style */
+        table.dataTable tbody td {
+            font-size: 0.875rem !important; /* text-sm */
+            color: #4b5563 !important; /* text-gray-600 */
+        }
+        
+        .dark table.dataTable tbody td {
+            color: #d1d5db !important; /* text-gray-300 */
+        }
     </style>
     @stack('styles')
 
@@ -205,9 +273,8 @@
             Alpine.store('theme', {
                 init() {
                     const savedTheme = localStorage.getItem('theme');
-                    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' :
-                        'light';
-                    this.theme = savedTheme || systemTheme;
+                    // Menggunakan light theme sebagai default jika tidak ada cache, mengabaikan systemTheme
+                    this.theme = savedTheme || 'light';
                     this.updateTheme();
                 },
                 theme: 'light',
@@ -264,8 +331,7 @@
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const theme = savedTheme || systemTheme;
+            const theme = savedTheme || 'light';
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.body.classList.add('dark', 'bg-gray-900');
