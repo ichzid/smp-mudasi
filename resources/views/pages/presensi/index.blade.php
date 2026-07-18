@@ -33,9 +33,14 @@
         <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <form action="{{ route('presensi.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end" id="filterForm">
                 <div>
-                    <label for="tanggal" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tanggal</label>
-                    <input type="date" id="tanggal" name="tanggal" value="{{ $tanggal }}" onchange="this.form.submit()"
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    <x-form.date-picker
+                        id="tanggal"
+                        name="tanggal"
+                        label="Tanggal"
+                        placeholder="Pilih tanggal"
+                        :default-date="$tanggal"
+                        @date-change="$el.closest('form').submit()"
+                    />
                 </div>
 
                 <div>
@@ -147,7 +152,7 @@
 
                     <!-- Table -->
                     <div class="overflow-x-auto p-5">
-                        <table class="w-full text-left border-collapse data-table-presensi">
+                        <table class="w-full text-left border-collapse {{ $presensi_data->isNotEmpty() ? 'data-table-presensi' : '' }}">
                             <thead>
                                 <tr class="bg-gray-50 dark:bg-gray-900/50">
                                     <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 w-16">No</th>
@@ -165,8 +170,8 @@
                                         <td class="px-5 py-4">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
-                                                    @if($item->siswa->foto)
-                                                        <img src="{{ Storage::url($item->siswa->foto) }}" alt="{{ $item->siswa->nama_lengkap }}" class="w-full h-full object-cover">
+                                                    @if($item->siswa->foto_url)
+                                                        <img src="{{ Storage::url($item->siswa->foto_url) }}" alt="{{ $item->siswa->nama_lengkap }}" class="w-full h-full object-cover">
                                                     @else
                                                         <div class="w-full h-full flex items-center justify-center text-gray-500">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

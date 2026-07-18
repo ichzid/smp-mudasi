@@ -19,7 +19,7 @@
         })();
     </script>
 </head>
-<body class="font-sans antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 overflow-hidden">
+<body class="font-sans antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100">
     @yield('content')
 </body>
 </html>

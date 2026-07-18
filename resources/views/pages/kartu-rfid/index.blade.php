@@ -56,8 +56,8 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                            @if($kartu->siswa->foto)
-                                                <img src="{{ Storage::url($kartu->siswa->foto) }}" alt="{{ $kartu->siswa->nama_lengkap }}" class="w-full h-full object-cover">
+                                            @if($kartu->siswa->foto_url)
+                                                <img src="{{ Storage::url($kartu->siswa->foto_url) }}" alt="{{ $kartu->siswa->nama_lengkap }}" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center text-gray-500">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

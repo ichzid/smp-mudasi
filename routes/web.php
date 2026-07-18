@@ -1,140 +1,55 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Master\SiswaController;
-use App\Http\Controllers\Master\TahunAjaranController;
+use App\Http\Controllers\KartuRfidController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\Master\GuruController;
 use App\Http\Controllers\Master\RombelController;
-use App\Http\Controllers\KartuRfidController;
-use App\Http\Controllers\RombelSiswaController;
+use App\Http\Controllers\Master\SiswaController;
+use App\Http\Controllers\Master\TahunAjaranController;
 use App\Http\Controllers\PresensiController;
-
-// dashboard pages
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-
-// CRUD Data Master Routes
-Route::prefix('master')->name('master.')->group(function () {
-    Route::resource('siswa', SiswaController::class);
-    Route::resource('tahun-ajaran', TahunAjaranController::class);
-    Route::resource('guru', GuruController::class);
-    Route::resource('rombel', RombelController::class);
-});
-
-// Other main features
-Route::resource('kartu-rfid', KartuRfidController::class);
-Route::resource('rombel-siswa', RombelSiswaController::class)->except(['show', 'edit', 'update']);
+use App\Http\Controllers\RombelSiswaController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('presensi/kiosk', [PresensiController::class, 'kiosk'])->name('presensi.kiosk');
-Route::post('presensi/scan', [PresensiController::class, 'scan'])->name('presensi.scan');
-Route::resource('presensi', PresensiController::class)->except(['create', 'show', 'edit', 'update', 'destroy']);
+Route::post('presensi/scan', [PresensiController::class, 'scan'])
+    ->middleware('throttle:30,1')
+    ->name('presensi.scan');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::middleware('role:admin,tu')->group(function () {
+        Route::prefix('master')->name('master.')->group(function () {
+            Route::resource('siswa', SiswaController::class);
+            Route::resource('tahun-ajaran', TahunAjaranController::class);
+            Route::resource('guru', GuruController::class);
+            Route::resource('rombel', RombelController::class);
+        });
 
-// ini adalah template pages
-// calender pages
-Route::get('/calendar', function () {
-    return view('pages.calender', ['title' => 'Calendar']);
-})->name('calendar');
+        Route::resource('kartu-rfid', KartuRfidController::class)->except(['show']);
+        Route::resource('rombel-siswa', RombelSiswaController::class)->except(['show', 'edit', 'update']);
+    });
 
-// profile pages
-Route::get('/profile', function () {
-    return view('pages.profile', ['title' => 'Profile']);
-})->name('profile');
+    Route::middleware('role:admin,tu,wali_kelas')->group(function () {
+        Route::resource('presensi', PresensiController::class)->only(['index', 'store']);
+        Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('laporan/csv', [LaporanController::class, 'csv'])->name('laporan.csv');
+        Route::get('laporan/print', [LaporanController::class, 'print'])->name('laporan.print');
+    });
 
-// logout routing (temporary simple redirect to home or login page)
-Route::post('/logout', function () {
-    // Auth::logout();
-    return redirect('/');
-})->name('logout');
-Route::get('/logout', function () {
-    // Auth::logout();
-    return redirect('/');
+    Route::get('/calendar', fn () => view('pages.calender', ['title' => 'Calendar']))->name('calendar');
+    Route::get('/profile', fn () => view('pages.profile', ['title' => 'Profile']))->name('profile');
+    Route::get('/form-elements', fn () => view('pages.form.form-elements', ['title' => 'Form Elements']))->name('form-elements');
+    Route::get('/basic-tables', fn () => view('pages.tables.basic-tables', ['title' => 'Basic Tables']))->name('basic-tables');
+    Route::get('/blank', fn () => view('pages.blank', ['title' => 'Blank']))->name('blank');
+    Route::get('/error-404', fn () => view('pages.errors.error-404', ['title' => 'Error 404']))->name('error-404');
+    Route::get('/line-chart', fn () => view('pages.chart.line-chart', ['title' => 'Line Chart']))->name('line-chart');
+    Route::get('/bar-chart', fn () => view('pages.chart.bar-chart', ['title' => 'Bar Chart']))->name('bar-chart');
+    Route::get('/alerts', fn () => view('pages.ui-elements.alerts', ['title' => 'Alerts']))->name('alerts');
+    Route::get('/avatars', fn () => view('pages.ui-elements.avatars', ['title' => 'Avatars']))->name('avatars');
+    Route::get('/badge', fn () => view('pages.ui-elements.badges', ['title' => 'Badges']))->name('badges');
+    Route::get('/buttons', fn () => view('pages.ui-elements.buttons', ['title' => 'Buttons']))->name('buttons');
+    Route::get('/image', fn () => view('pages.ui-elements.images', ['title' => 'Images']))->name('images');
+    Route::get('/videos', fn () => view('pages.ui-elements.videos', ['title' => 'Videos']))->name('videos');
 });
-
-// form pages
-Route::get('/form-elements', function () {
-    return view('pages.form.form-elements', ['title' => 'Form Elements']);
-})->name('form-elements');
-
-// tables pages
-Route::get('/basic-tables', function () {
-    return view('pages.tables.basic-tables', ['title' => 'Basic Tables']);
-})->name('basic-tables');
-
-// pages
-
-Route::get('/blank', function () {
-    return view('pages.blank', ['title' => 'Blank']);
-})->name('blank');
-
-// error pages
-Route::get('/error-404', function () {
-    return view('pages.errors.error-404', ['title' => 'Error 404']);
-})->name('error-404');
-
-// chart pages
-Route::get('/line-chart', function () {
-    return view('pages.chart.line-chart', ['title' => 'Line Chart']);
-})->name('line-chart');
-
-Route::get('/bar-chart', function () {
-    return view('pages.chart.bar-chart', ['title' => 'Bar Chart']);
-})->name('bar-chart');
-
-
-// authentication pages
-Route::get('/signin', function () {
-    return view('pages.auth.signin', ['title' => 'Sign In']);
-})->name('signin');
-
-Route::get('/signup', function () {
-    return view('pages.auth.signup', ['title' => 'Sign Up']);
-})->name('signup');
-
-// ui elements pages
-Route::get('/alerts', function () {
-    return view('pages.ui-elements.alerts', ['title' => 'Alerts']);
-})->name('alerts');
-
-Route::get('/avatars', function () {
-    return view('pages.ui-elements.avatars', ['title' => 'Avatars']);
-})->name('avatars');
-
-Route::get('/badge', function () {
-    return view('pages.ui-elements.badges', ['title' => 'Badges']);
-})->name('badges');
-
-Route::get('/buttons', function () {
-    return view('pages.ui-elements.buttons', ['title' => 'Buttons']);
-})->name('buttons');
-
-Route::get('/image', function () {
-    return view('pages.ui-elements.images', ['title' => 'Images']);
-})->name('images');
-
-Route::get('/videos', function () {
-    return view('pages.ui-elements.videos', ['title' => 'Videos']);
-})->name('videos');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

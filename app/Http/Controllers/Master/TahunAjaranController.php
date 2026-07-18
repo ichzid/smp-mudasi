@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class TahunAjaranController extends Controller
 {
@@ -32,13 +33,20 @@ class TahunAjaranController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:50',
+            'nama' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('tahun_ajaran')->where(fn ($query) => $query->where('semester', $request->input('semester'))),
+            ],
             'semester' => 'required|in:1,2',
             'is_aktif' => 'required|boolean',
         ]);
 
         DB::beginTransaction();
         try {
+            TahunAjaran::query()->lockForUpdate()->get();
+
             if ($validated['is_aktif']) {
                 TahunAjaran::where('is_aktif', true)->update(['is_aktif' => false]);
             }
@@ -78,14 +86,22 @@ class TahunAjaranController extends Controller
         $tahunAjaran = TahunAjaran::findOrFail($id);
 
         $validated = $request->validate([
-            'nama' => 'required|string|max:50',
+            'nama' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('tahun_ajaran')->where(fn ($query) => $query->where('semester', $request->input('semester')))->ignore($tahunAjaran->id),
+            ],
             'semester' => 'required|in:1,2',
             'is_aktif' => 'required|boolean',
         ]);
 
         DB::beginTransaction();
         try {
-            if ($validated['is_aktif'] && !$tahunAjaran->is_aktif) {
+            $tahunAjarans = TahunAjaran::query()->lockForUpdate()->get();
+            $tahunAjaran = $tahunAjarans->firstWhere('id', (int) $id) ?? TahunAjaran::findOrFail($id);
+
+            if ($validated['is_aktif']) {
                 TahunAjaran::where('id', '!=', $id)->where('is_aktif', true)->update(['is_aktif' => false]);
             }
 

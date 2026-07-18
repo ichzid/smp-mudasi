@@ -14,8 +14,8 @@
         <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-8 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <div class="mb-6 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center gap-4">
                 <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                    @if($kartu->siswa->foto)
-                        <img src="{{ Storage::url($kartu->siswa->foto) }}" alt="{{ $kartu->siswa->nama_lengkap }}" class="w-full h-full object-cover">
+                    @if($kartu->siswa->foto_url)
+                        <img src="{{ Storage::url($kartu->siswa->foto_url) }}" alt="{{ $kartu->siswa->nama_lengkap }}" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full flex items-center justify-center text-gray-500">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

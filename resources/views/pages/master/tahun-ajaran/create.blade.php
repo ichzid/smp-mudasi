@@ -11,11 +11,11 @@
             ]" 
         />
 
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-8 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
-            <form action="{{ route('master.tahun-ajaran.store') }}" method="POST" class="space-y-6">
+        <div class="mx-auto max-w-5xl rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+            <form action="{{ route('master.tahun-ajaran.store') }}" method="POST">
                 @csrf
-                
-                <div class="grid grid-cols-1 gap-6">
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                     <!-- Nama Tahun Ajaran -->
                     <div>
                         <label for="nama" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tahun Ajaran <span class="text-red-500">*</span></label>
@@ -69,7 +69,7 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 mt-8">
+                <div class="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-5 dark:border-gray-800">
                     <a href="{{ route('master.tahun-ajaran.index') }}" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-all">
                         Batal
                     </a>

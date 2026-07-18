@@ -8,7 +8,7 @@
     'dateFormat' => 'Y-m-d',
 ])
 
-<div x-data="{
+<div {{ $attributes->only(['class', 'x-on:date-change', '@date-change']) }} x-data="{
     flatpickrInstance: null,
     init() {
         this.$nextTick(() => {
@@ -50,6 +50,7 @@
             placeholder="{{ $placeholder }}"
             class="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
             autocomplete="off"
+            {{ $attributes->except(['class', 'x-on:date-change', '@date-change']) }}
         />
         <span class="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" class="size-6">

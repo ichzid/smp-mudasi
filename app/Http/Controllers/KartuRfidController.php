@@ -44,6 +44,8 @@ class KartuRfidController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge(['kode_uid' => strtoupper($request->input('kode_uid', ''))]);
+
         $validated = $request->validate([
             'siswa_id' => 'required|exists:siswa,id|unique:kartu_rfid,siswa_id',
             'kode_uid' => 'required|string|unique:kartu_rfid,kode_uid',
@@ -81,7 +83,8 @@ class KartuRfidController extends Controller
     public function update(Request $request, string $id)
     {
         $kartu = KartuRfid::findOrFail($id);
-        
+        $request->merge(['kode_uid' => strtoupper($request->input('kode_uid', ''))]);
+
         $validated = $request->validate([
             'kode_uid' => 'required|string|unique:kartu_rfid,kode_uid,' . $kartu->id,
             'status' => 'required|in:aktif,nonaktif',

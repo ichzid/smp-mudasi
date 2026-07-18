@@ -15,6 +15,14 @@ class RombelSiswa extends Model
         'tanggal_keluar',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'tanggal_masuk' => 'date',
+            'tanggal_keluar' => 'date',
+        ];
+    }
+
     public function rombel()
     {
         return $this->belongsTo(Rombel::class);

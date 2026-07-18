@@ -232,21 +232,36 @@ Yang perlu diketahui:
 
 ## 9. Roadmap eksekusi
 
-- [x] **Fase 0** — clone `TailAdmin/tailadmin-laravel` (lihat bagian 8), pasang & wiring Laravel Fortify ke view Auth bawaan template, tambah kolom `role` ke migration `users`, pastikan login jalan end-to-end.
+- [x] **Fase 0 — fondasi, autentikasi, dan otorisasi**
+  - [x] TailAdmin terpasang dan layout aplikasi tersedia.
+  - [x] Laravel Fortify dan kolom `role` pada tabel `users` tersedia.
+  - [x] View login/register terhubung ke Fortify dan login/logout berjalan end-to-end.
+  - [x] Halaman administrasi dilindungi middleware `auth`.
+  - [x] Middleware role `admin`, `tu`, dan `wali_kelas` aktif; presensi/laporan wali kelas dibatasi berdasarkan rombel yang diampu.
 - [x] **Fase 1 — data master**
-  - [x] Migration & model: `tahun_ajaran`, `rombel`, `siswa`, `rombel_siswa`, `kartu_rfid`, `guru`.
-  - [x] CRUD siswa (form + upload foto).
-  - [x] CRUD rombel per tahun ajaran.
-  - [x] Halaman kelola kartu RFID per siswa (tegakkan aturan 1 siswa = 1 kartu di UI: kalau siswa sudah punya kartu, form jadi mode "ganti kartu", bukan "tambah kartu").
-- [ ] **Fase 2 — presensi**
-  - [ ] Endpoint `POST /presensi/scan` sesuai alur di atas.
-  - [ ] Halaman kiosk (adaptasi dari prototipe yang sudah dibuat, ganti data dummy dengan Alpine `x-data` + `fetch()` ke endpoint asli — lihat catatan di bagian 7).
-  - [ ] Form presensi manual (izin/sakit) untuk wali kelas.
-- [ ] **Fase 3 — laporan**
-  - [ ] Rekap harian per rombel.
-  - [ ] Rekap bulanan per siswa, ekspor Excel/PDF.
-  - [ ] Dashboard ringkas (jumlah hadir/terlambat/alpa hari ini).
-- [ ] **Fase 4+ (nanti, di luar MVP)** — modul akademik: nilai, jadwal pelajaran.
+  - [x] Migration & model tersedia untuk `tahun_ajaran`, `rombel`, `siswa`, `rombel_siswa`, `kartu_rfid`, dan `guru`.
+  - [x] CRUD tahun ajaran, guru, siswa, dan rombel per tahun ajaran.
+  - [x] CRUD siswa selaras untuk `nama_lengkap`, data wali, status siswa, NISN opsional, dan upload foto.
+  - [x] Histori Rombel Siswa dipertahankan melalui `tanggal_keluar` dan perpindahan kelas tidak menghapus riwayat.
+  - [x] Penempatan rombel hanya untuk siswa aktif dan menolak rentang keanggotaan yang tumpang tindih.
+  - [x] Kartu RFID menegakkan satu siswa satu kartu, menormalisasi UID, dan tidak memiliki route detail tanpa halaman.
+- [x] **Fase 2 — presensi**
+  - [x] Endpoint `POST /presensi/scan` memvalidasi UID, dibatasi rate limit, aman terhadap scan ganda, dan memakai batas terlambat dari konfigurasi.
+  - [x] Halaman kiosk menggunakan Alpine `x-data` dan `fetch()` ke endpoint asli, dengan input UID manual sementara.
+  - [x] Presensi manual memvalidasi keanggotaan siswa, memakai user login sebagai pencatat, dan mempertahankan jejak RFID jika status tidak berubah.
+  - [x] Wali kelas hanya dapat mengelola presensi rombel yang diampu.
+- [x] **Fase 3 — laporan**
+  - [x] Rekap harian per rombel tersedia pada modul laporan terpisah.
+  - [x] Rekap bulanan per siswa dan ekspor CSV kompatibel Excel tersedia.
+  - [x] Halaman cetak tersedia untuk Print / Save as PDF tanpa dependency PDF tambahan.
+  - [x] Dashboard ringkas jumlah hadir, terlambat, izin, sakit, dan alpa hari ini.
+  - [x] Denominator dashboard hanya menghitung siswa aktif pada rombel tahun ajaran aktif.
+- [x] **Kualitas dan integritas aplikasi**
+  - [x] Unique gabungan nama dan semester Tahun Ajaran tersedia.
+  - [x] Invariant satu Tahun Ajaran aktif diperkuat menggunakan transaksi dan row locking pada controller.
+  - [x] Feature test tersedia untuk autentikasi/role, CRUD siswa, Tahun Ajaran, kartu RFID, mutasi rombel, dashboard, presensi, dan laporan.
+  - [x] Nama tabel/kolom utama antara migration, model, controller, validation, dan Blade sudah diselaraskan.
+- [ ] **Fase 4+ (nanti, di luar MVP)** — modul akademik: nilai dan jadwal pelajaran.
 
 ## 10. Hal yang sengaja belum diputuskan
 

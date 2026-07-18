@@ -2,34 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Siswa;
 use App\Models\Guru;
-use App\Models\Rombel;
 use App\Models\Presensi;
+use App\Models\RombelSiswa;
+use App\Models\TahunAjaran;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $totalSiswa = Siswa::count();
+        $today = Carbon::today()->toDateString();
+        $tahunAjaranAktif = TahunAjaran::where('is_aktif', true)->first();
+
+        $anggotaAktif = RombelSiswa::query()
+            ->whereHas('siswa', fn ($query) => $query->where('status', 'aktif'))
+            ->whereDate('tanggal_masuk', '<=', $today)
+            ->where(function ($query) use ($today) {
+                $query->whereNull('tanggal_keluar')
+                    ->orWhereDate('tanggal_keluar', '>=', $today);
+            });
+
+        if ($tahunAjaranAktif) {
+            $anggotaAktif->whereHas(
+                'rombel',
+                fn ($query) => $query->where('tahun_ajaran_id', $tahunAjaranAktif->id)
+            );
+        } else {
+            $anggotaAktif->whereRaw('1 = 0');
+        }
+
+        $siswaIds = (clone $anggotaAktif)->select('siswa_id')->distinct();
+        $rombelIds = (clone $anggotaAktif)->select('rombel_id')->distinct();
+        $totalSiswa = (clone $siswaIds)->count('siswa_id');
         $totalGuru = Guru::count();
-        $totalRombel = Rombel::count();
-        
-        $today = Carbon::today()->format('Y-m-d');
-        
-        $hadir = Presensi::where('tanggal', $today)->where('status', 'hadir')->count();
-        $terlambat = Presensi::where('tanggal', $today)->where('status', 'terlambat')->count();
-        $izin = Presensi::where('tanggal', $today)->where('status', 'izin')->count();
-        $sakit = Presensi::where('tanggal', $today)->where('status', 'sakit')->count();
-        $alpa = Presensi::where('tanggal', $today)->where('status', 'alpa')->count();
-        
+        $totalRombel = (clone $rombelIds)->count('rombel_id');
+
+        $statistik = Presensi::query()
+            ->whereDate('tanggal', $today)
+            ->whereExists(function ($query) use ($today, $tahunAjaranAktif) {
+                $query->select(DB::raw(1))
+                    ->from('rombel_siswa')
+                    ->join('siswa', 'siswa.id', '=', 'rombel_siswa.siswa_id')
+                    ->join('rombel', 'rombel.id', '=', 'rombel_siswa.rombel_id')
+                    ->whereColumn('rombel_siswa.siswa_id', 'presensi.siswa_id')
+                    ->whereColumn('rombel_siswa.rombel_id', 'presensi.rombel_id')
+                    ->where('siswa.status', 'aktif')
+                    ->whereDate('rombel_siswa.tanggal_masuk', '<=', $today)
+                    ->where(function ($query) use ($today) {
+                        $query->whereNull('rombel_siswa.tanggal_keluar')
+                            ->orWhereDate('rombel_siswa.tanggal_keluar', '>=', $today);
+                    })
+                    ->when(
+                        $tahunAjaranAktif,
+                        fn ($query) => $query->where('rombel.tahun_ajaran_id', $tahunAjaranAktif->id),
+                        fn ($query) => $query->whereRaw('1 = 0')
+                    );
+            })
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $hadir = (int) $statistik->get('hadir', 0);
+        $terlambat = (int) $statistik->get('terlambat', 0);
+        $izin = (int) $statistik->get('izin', 0);
+        $sakit = (int) $statistik->get('sakit', 0);
+        $alpa = (int) $statistik->get('alpa', 0);
         $totalHadir = $hadir + $terlambat;
-        // Asumsi bahwa semua siswa harus diabsen hari ini
-        // Pada prakteknya mungkin hanya yang terdaftar di rombel pada tahun ajaran aktif
         $persentaseHadir = $totalSiswa > 0 ? round(($totalHadir / $totalSiswa) * 100) : 0;
-        
+
         return view('pages.dashboard.index', compact(
             'totalSiswa', 'totalGuru', 'totalRombel', 'today',
             'hadir', 'terlambat', 'izin', 'sakit', 'alpa', 'totalHadir', 'persentaseHadir'

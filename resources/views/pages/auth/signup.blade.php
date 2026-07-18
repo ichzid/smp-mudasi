@@ -52,27 +52,19 @@
                                 <span class="bg-white p-2 text-gray-400 sm:px-5 sm:py-2 dark:bg-gray-900">Or</span>
                             </div>
                         </div>
-                        <form>
+                        <form method="POST" action="{{ route('register') }}">
+                            @csrf
                             <div class="space-y-5">
-                                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                                    <!-- First Name -->
-                                    <div class="sm:col-span-1">
-                                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                            First Name<span class="text-error-500">*</span>
-                                        </label>
-                                        <input type="text" id="fname" name="fname"
-                                            placeholder="Enter your first name"
-                                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
-                                    </div>
-                                    <!-- Last Name -->
-                                    <div class="sm:col-span-1">
-                                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                            Last Name<span class="text-error-500">*</span>
-                                        </label>
-                                        <input type="text" id="lname" name="lname"
-                                            placeholder="Enter your last name"
-                                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
-                                    </div>
+                                @if ($errors->any())
+                                    <div class="rounded-lg bg-error-50 p-3 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400">{{ $errors->first() }}</div>
+                                @endif
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        Name<span class="text-error-500">*</span>
+                                    </label>
+                                    <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus autocomplete="name"
+                                        placeholder="Enter your name"
+                                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
                                 </div>
                                 <!-- Email -->
                                 <div>
@@ -88,7 +80,7 @@
                                         Password<span class="text-error-500">*</span>
                                     </label>
                                     <div x-data="{ showPassword: false }" class="relative">
-                                        <input :type="showPassword ? 'text' : 'password'" placeholder="Enter your password"
+                                        <input :type="showPassword ? 'text' : 'password'" name="password" required autocomplete="new-password" placeholder="Enter your password"
                                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-11 pl-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
                                         <span @click="showPassword = !showPassword"
                                             class="absolute top-1/2 right-4 z-30 -translate-y-1/2 cursor-pointer text-gray-500 dark:text-gray-400">
@@ -100,6 +92,13 @@
                                             </svg>
                                         </span>
                                     </div>
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        Confirm Password<span class="text-error-500">*</span>
+                                    </label>
+                                    <input type="password" name="password_confirmation" required autocomplete="new-password" placeholder="Confirm your password"
+                                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
                                 </div>
                                 <!-- Checkbox -->
                                 <div>
@@ -133,7 +132,7 @@
                                 </div>
                                 <!-- Button -->
                                 <div>
-                                    <button
+                                    <button type="submit"
                                         class="bg-brand-500 shadow-theme-xs hover:bg-brand-600 flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-medium text-white transition">
                                         Sign Up
                                     </button>

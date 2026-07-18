@@ -63,13 +63,80 @@ class MenuHelper
     {
         return [
             [
-                'title' => 'Menu',
-                'items' => self::getMainNavItems()
+                'title' => 'Beranda',
+                'items' => [
+                    [
+                        'icon' => 'dashboard',
+                        'name' => 'Dashboard',
+                        'path' => '/',
+                    ],
+                ],
             ],
             [
-                'title' => 'Others',
-                'items' => self::getOthersItems()
-            ]
+                'title' => 'Data Master',
+                'items' => [
+                    [
+                        'icon' => 'calendar',
+                        'name' => 'Tahun Ajaran',
+                        'path' => '/master/tahun-ajaran',
+                    ],
+                    [
+                        'icon' => 'user-profile',
+                        'name' => 'Guru',
+                        'path' => '/master/guru',
+                    ],
+                    [
+                        'icon' => 'user-profile',
+                        'name' => 'Siswa',
+                        'path' => '/master/siswa',
+                    ],
+                    [
+                        'icon' => 'tables',
+                        'name' => 'Rombel',
+                        'path' => '/master/rombel',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Akademik',
+                'items' => [
+                    [
+                        'icon' => 'tables',
+                        'name' => 'Rombel Siswa',
+                        'path' => '/rombel-siswa',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Presensi',
+                'items' => [
+                    [
+                        'icon' => 'task',
+                        'name' => 'Kartu RFID',
+                        'path' => '/kartu-rfid',
+                    ],
+                    [
+                        'icon' => 'forms',
+                        'name' => 'Kiosk Presensi',
+                        'path' => '/presensi/kiosk',
+                    ],
+                    [
+                        'icon' => 'calendar',
+                        'name' => 'Rekap Presensi',
+                        'path' => '/presensi',
+                        'exact' => true,
+                    ],
+                    [
+                        'icon' => 'tables',
+                        'name' => 'Laporan',
+                        'path' => '/laporan',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Sistem',
+                'items' => self::getOthersItems(),
+            ],
         ];
     }
 

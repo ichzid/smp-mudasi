@@ -48,12 +48,17 @@
             const key = groupIndex + '-' + itemIndex;
             return this.openSubmenus[key] || false;
         },
-        isActive(path) {
+        isActive(path, exact = false) {
             const currentPath = '{{ $currentPath }}';
             const cleanPath = path.replace(/^\//, '');
-            return window.location.pathname === path || 
-                   (path !== '/' && window.location.pathname.startsWith(path + '/')) || 
-                   currentPath === cleanPath || 
+
+            if (exact) {
+                return window.location.pathname === path || currentPath === cleanPath;
+            }
+
+            return window.location.pathname === path ||
+                   (path !== '/' && window.location.pathname.startsWith(path + '/')) ||
+                   currentPath === cleanPath ||
                    (cleanPath !== '' && currentPath.startsWith(cleanPath + '/'));
         }
     }"
@@ -188,7 +193,7 @@
                                         <!-- Simple Menu Item -->
                                         <a href="{{ $item['path'] }}" class="menu-item group"
                                             :class="[
-                                                isActive('{{ $item['path'] }}') ? 'menu-item-active' :
+                                                isActive('{{ $item['path'] }}', {{ !empty($item['exact']) ? 'true' : 'false' }}) ? 'menu-item-active' :
                                                 'menu-item-inactive',
                                                 (!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ?
                                                 'xl:justify-center' :
@@ -197,7 +202,7 @@
 
                                             <!-- Icon -->
                                             <span
-                                                :class="isActive('{{ $item['path'] }}') ? 'menu-item-icon-active' :
+                                                :class="isActive('{{ $item['path'] }}', {{ !empty($item['exact']) ? 'true' : 'false' }}) ? 'menu-item-icon-active' :
                                                     'menu-item-icon-inactive'">
                                                 {!! MenuHelper::getIconSvg($item['icon']) !!}
                                             </span>

@@ -32,7 +32,7 @@ class SiswaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nisn' => 'required|string|unique:siswa,nisn',
+            'nisn' => 'nullable|string|unique:siswa,nisn',
             'nis' => 'required|string|unique:siswa,nis',
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
@@ -42,6 +42,7 @@ class SiswaController extends Controller
             'nama_wali' => 'nullable|string',
             'no_hp_wali' => 'nullable|string',
             'foto_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'status' => 'required|in:aktif,lulus,pindah,keluar',
         ]);
 
         if ($request->hasFile('foto_url')) {
@@ -80,7 +81,7 @@ class SiswaController extends Controller
         $siswa = Siswa::findOrFail($id);
 
         $validated = $request->validate([
-            'nisn' => 'required|string|unique:siswa,nisn,' . $siswa->id,
+            'nisn' => 'nullable|string|unique:siswa,nisn,' . $siswa->id,
             'nis' => 'required|string|unique:siswa,nis,' . $siswa->id,
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
@@ -90,6 +91,7 @@ class SiswaController extends Controller
             'nama_wali' => 'nullable|string',
             'no_hp_wali' => 'nullable|string',
             'foto_url' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'status' => 'required|in:aktif,lulus,pindah,keluar',
         ]);
 
         if ($request->hasFile('foto_url')) {

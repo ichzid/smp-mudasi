@@ -30,11 +30,11 @@ class FortifyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Fortify::loginView(function () {
-            return view('auth.login');
+            return view('pages.auth.signin', ['title' => 'Sign In']);
         });
 
         Fortify::registerView(function () {
-            return view('auth.register');
+            return view('pages.auth.signup', ['title' => 'Sign Up']);
         });
 
         Fortify::createUsersUsing(CreateNewUser::class);

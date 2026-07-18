@@ -28,9 +28,14 @@
                 <input type="hidden" name="rombel_id" value="{{ $rombel->id }}">
                 
                 <div class="mb-6 w-full sm:w-1/3">
-                    <label for="tanggal_masuk" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tanggal Masuk (Efektif) <span class="text-red-500">*</span></label>
-                    <input type="date" id="tanggal_masuk" name="tanggal_masuk" value="{{ old('tanggal_masuk', date('Y-m-d')) }}" required
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    <x-form.date-picker
+                        id="tanggal_masuk"
+                        name="tanggal_masuk"
+                        label="Tanggal Masuk (Efektif) *"
+                        placeholder="Pilih tanggal masuk"
+                        :default-date="old('tanggal_masuk', date('Y-m-d'))"
+                        required
+                    />
                     @error('tanggal_masuk')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror
@@ -39,7 +44,7 @@
                 <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white">Pilih Siswa</h4>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Daftar siswa di bawah adalah siswa yang belum terdaftar di rombel manapun pada tahun ajaran ini.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Hanya siswa aktif tanpa keanggotaan yang masih terbuka pada tahun ajaran ini. Siswa dengan histori tertutup dapat dipindahkan jika tanggal baru tidak overlap.</p>
                     </div>
                     
                     <div class="relative w-full sm:w-64">
@@ -94,7 +99,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="4" class="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
-                                            Semua siswa sudah terdaftar di rombel pada tahun ajaran ini.
+                                            Tidak ada siswa aktif yang dapat dipilih saat ini.
                                         </td>
                                     </tr>
                                 @endforelse

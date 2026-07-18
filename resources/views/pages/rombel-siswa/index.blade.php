@@ -40,7 +40,7 @@
                             onchange="document.getElementById('rombel_id').value=''; this.form.submit()" @change="isOptionSelected = true">
                             <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Tahun Ajaran</option>
                             @foreach($tahun_ajarans as $ta)
-                                <option value="{{ $ta->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $tahun_ajaran_id == $ta->id || (empty($tahun_ajaran_id) && $ta->is_aktif) ? 'selected' : '' }}>
+                                <option value="{{ $ta->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ (string) $tahun_ajaran_id === (string) $ta->id ? 'selected' : '' }}>
                                     {{ $ta->nama }} - Semester {{ $ta->semester == 1 ? 'Ganjil' : 'Genap' }}
                                     {{ $ta->is_aktif ? '(Aktif)' : '' }}
                                 </option>
@@ -58,12 +58,12 @@
                     <label for="rombel_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Rombel</label>
                     <div x-data="{ isOptionSelected: true }" class="relative z-20 bg-transparent">
                         <select id="rombel_id" name="rombel_id" 
-                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 text-gray-800 dark:text-white/90" 
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 text-gray-800 dark:text-white/90 {{ !$tahun_ajaran_id ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800' : '' }}" 
                             onchange="this.form.submit()" {{ !$tahun_ajaran_id ? 'disabled' : '' }} @change="isOptionSelected = true">
                             <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Rombel</option>
                             @foreach($rombels as $rombel)
                                 <option value="{{ $rombel->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $rombel_id == $rombel->id ? 'selected' : '' }}>
-                                    Kelas {{ $rombel->tingkat }} - {{ $rombel->nama_rombel }}
+                                    Kelas {{ $rombel->tingkat }} - {{ $rombel->nama }}
                                 </option>
                             @endforeach
                         </select>
@@ -86,7 +86,7 @@
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">
                             Anggota Rombel: {{ $rombels->where('id', $rombel_id)->first()->nama ?? '' }}
                         </h3>
-                        <p class="text-sm text-gray-500 mt-1">Total: {{ $rombel_siswas->count() }} siswa terdaftar.</p>
+                        <p class="text-sm text-gray-500 mt-1">Anggota aktif: {{ $rombel_siswas->whereNull('tanggal_keluar')->count() }} siswa. Histori tetap ditampilkan.</p>
                     </div>
                     <div class="flex gap-3">
                         <a href="{{ route('rombel-siswa.create', ['rombel_id' => $rombel_id]) }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all">
@@ -100,7 +100,7 @@
 
                 <!-- Table -->
                 <div class="overflow-x-auto p-5">
-                    <table class="w-full text-left border-collapse data-table">
+                    <table class="w-full text-left border-collapse {{ $rombel_siswas->isNotEmpty() ? 'data-table' : '' }}">
                         <thead>
                             <tr class="bg-gray-50 dark:bg-gray-900/50">
                                 <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 w-16">No</th>
@@ -108,6 +108,7 @@
                                 <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Nama Lengkap</th>
                                 <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">L/P</th>
                                 <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Tgl. Masuk</th>
+                                <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Tgl. Keluar</th>
                                 <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 text-right w-24" data-orderable="false">Aksi</th>
                             </tr>
                         </thead>
@@ -143,23 +144,31 @@
                                         {{ $rs->siswa->jenis_kelamin }}
                                     </td>
                                     <td class="px-5 py-4 text-sm text-gray-900 dark:text-gray-300">
-                                        {{ \Carbon\Carbon::parse($rs->tanggal_masuk)->format('d M Y') }}
+                                        {{ $rs->tanggal_masuk->format('d M Y') }}
+                                    </td>
+                                    <td class="px-5 py-4 text-sm text-gray-900 dark:text-gray-300">
+                                        {{ $rs->tanggal_keluar?->format('d M Y') ?? 'Aktif' }}
                                     </td>
                                     <td class="px-5 py-4 text-right">
-                                        <form action="{{ route('rombel-siswa.destroy', $rs->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Keluarkan siswa ini dari rombel? Data presensi yang terhubung mungkin akan terpengaruh.');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Keluarkan dari Rombel">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"></path>
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        @if($rs->tanggal_keluar === null)
+                                            <form action="{{ route('rombel-siswa.destroy', $rs->id) }}" method="POST" class="inline-flex items-center gap-2" onsubmit="return confirm('Tutup keanggotaan siswa ini? Histori tidak akan dihapus.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="date" name="tanggal_keluar" value="{{ date('Y-m-d') }}" min="{{ $rs->tanggal_masuk->format('Y-m-d') }}" required class="h-9 rounded-lg border border-gray-300 bg-transparent px-2 text-xs text-gray-800 dark:border-gray-700 dark:text-white/90">
+                                                <button type="submit" class="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Tutup Keanggotaan">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-xs text-gray-500">Histori</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-5 py-12 text-center">
+                                    <td colspan="7" class="px-5 py-12 text-center">
                                         <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
                                             <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>

@@ -89,6 +89,10 @@
     margin-top:2px;
   }
 
+  .time-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  .date-label{font-size:12px;color:var(--ink-dim);font-weight:600}
+  .online-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--green-light);color:var(--green-dark);font-size:11px;font-weight:700}
+  .online-dot{width:7px;height:7px;border-radius:999px;background:var(--green);box-shadow:0 0 0 3px rgba(15,140,71,.14)}
   .clock{
     font-family: monospace;
     font-size:16px;
@@ -163,6 +167,14 @@
 
   .input-wrap input::placeholder{ color:#cbd5e1; }
   .dark .input-wrap input::placeholder { color:#475569; }
+  .input-wrap.error input{border-color:var(--error);box-shadow:0 0 0 4px rgba(239,68,68,.1)}
+  .scan-form{display:flex;gap:10px;align-items:stretch}
+  .scan-form .input-wrap{flex:1}
+  .scan-button{border:0;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;padding:0 20px;font-size:14px;font-weight:700;cursor:pointer;min-width:112px;transition:.2s;box-shadow:0 10px 24px -12px rgba(15,140,71,.7)}
+  .scan-button:hover{transform:translateY(-1px)}
+  .scan-button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .helper-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;color:var(--ink-dim);font-size:11.5px}
+  .key-hint{padding:3px 7px;border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:6px;background:var(--panel-alt);font-family:monospace;font-weight:700}
 
   .scan-line{
     position:absolute;
@@ -203,13 +215,15 @@
     box-shadow: 0 24px 50px -28px rgba(10,50,25,0.22);
   }
 
+  .log-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
   .log-panel h2{
     font-size:14.5px;
-    margin:0 0 16px;
+    margin:0;
     color:var(--ink-dim);
     font-weight:600;
     letter-spacing:.02em;
   }
+  .log-count{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 8px;border-radius:999px;background:var(--panel-alt);color:var(--ink-dim);font-size:11px;font-weight:700}
 
   .log-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
 
@@ -268,6 +282,23 @@
   .li-status.hadir{ background:var(--green-light); color:var(--green-dark); }
   .li-status.terlambat{ background:#fef3c7; color:#b45309; }
 
+  @media (max-width: 640px){
+    body{padding:12px;justify-content:flex-start}
+    main.kiosk{gap:14px}
+    .topbar{padding-top:4px}
+    .school-name{font-size:13px}
+    .school-sub{font-size:9px}
+    .sun-mark{width:34px;height:34px}
+    .time-panel{justify-content:flex-start;width:100%;padding-left:46px}
+    .date-label{width:100%}
+    .scanner-card{padding:26px 20px 22px}
+    .scanner-card h1{font-size:21px}
+    .scan-form{flex-direction:column}
+    .scan-button{height:48px;width:100%}
+    .helper-row{align-items:flex-start}
+    .log-panel{padding:20px 16px;max-height:none}
+  }
+
   /* Modal Override to hide TailAdmin's default modal when using this */
   [x-cloak] { display: none !important; }
 </style>
@@ -304,7 +335,11 @@
           <div class="school-sub">Sistem Presensi Digital</div>
         </div>
       </div>
-      <span class="clock" x-text="currentTime">--:--:--</span>
+      <div class="time-panel">
+        <span class="online-badge"><span class="online-dot"></span>Sistem siap</span>
+        <span class="date-label" x-text="currentDate">Memuat tanggal...</span>
+        <span class="clock" x-text="currentTime">--:--:--</span>
+      </div>
     </div>
   
     <section class="scanner-card">
@@ -317,18 +352,29 @@
       <h1>Tempelkan Kartu Pelajar</h1>
       <p class="sub">Untuk simulasi, ketik kode unik kartu lalu tekan <strong>Enter</strong>. Nantinya kolom ini akan otomatis terisi saat kartu RFID ditempelkan ke alat pembaca.</p>
   
-      <form @submit.prevent="processScan()">
+      <form @submit.prevent="processScan()" class="scan-form">
         <div class="input-wrap" :class="isProcessing ? 'scanning' : (isError ? 'error' : '')">
-          <input type="text" x-ref="rfidInput" x-model="rfidCode" placeholder="• • • • • • • •" autocomplete="off" :disabled="isProcessing" />
+          <input type="text" x-ref="rfidInput" x-model="rfidCode" placeholder="Masukkan kode UID kartu" autocomplete="off" :disabled="isProcessing" aria-label="Kode UID kartu RFID" />
           <div class="scan-line"></div>
         </div>
+        <button type="submit" class="scan-button" :disabled="isProcessing || !rfidCode.trim()" x-text="isProcessing ? 'Memproses...' : 'Catat hadir'">Catat hadir</button>
       </form>
+      <div class="helper-row">
+        <span>Input otomatis kembali aktif setelah presensi selesai.</span>
+        <span>Tekan <span class="key-hint">Enter</span></span>
+      </div>
       
-      <div class="feedback" :class="isError ? 'error' : ''" x-text="feedbackMsg"></div>
+      <div class="feedback" :class="isError ? 'error' : ''" role="status" aria-live="polite" x-text="feedbackMsg"></div>
     </section>
   
     <aside class="log-panel">
-      <h2>Presensi Terakhir</h2>
+      <div class="log-heading">
+        <div>
+          <h2>Presensi Terakhir</h2>
+          <p class="mt-1 text-xs text-gray-400">Riwayat selama halaman ini terbuka</p>
+        </div>
+        <span class="log-count" x-text="recentScans.length">0</span>
+      </div>
       <ul class="log-list">
         <template x-if="recentScans.length === 0">
             <li class="empty">Belum ada presensi hari ini</li>
@@ -362,6 +408,7 @@
     function kioskData() {
         return {
             currentTime: '--:--:--',
+            currentDate: '',
             rfidCode: '',
             isProcessing: false,
             isError: false,
@@ -390,6 +437,7 @@
             updateClock() {
                 const now = new Date();
                 this.currentTime = now.toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                this.currentDate = now.toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
             },
             
             focusInput() {
@@ -439,6 +487,7 @@
                 this.resultData = data;
                 this.resultType = 'success';
                 this.resultMessage = data.pesan;
+                this.feedbackMsg = data.pesan;
                 this.displayModal();
             },
             
@@ -453,14 +502,15 @@
             
             addToRecentLog(data) {
                 const newScan = {
-                    id: Date.now(),
+                    id: data.nis,
                     nama: data.nama,
                     kelas: data.kelas,
                     waktu: data.waktu,
                     status: data.status,
                     foto_url: data.foto_url
                 };
-                
+
+                this.recentScans = this.recentScans.filter(scan => scan.id !== newScan.id);
                 this.recentScans.unshift(newScan);
                 if(this.recentScans.length > 6) {
                     this.recentScans.pop();
