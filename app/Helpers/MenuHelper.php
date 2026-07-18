@@ -35,7 +35,10 @@ class MenuHelper
             [
                 'icon' => 'forms',
                 'name' => 'Presensi',
-                'path' => '/presensi',
+                'subItems' => [
+                    ['name' => 'Kiosk Scan RFID', 'path' => '/presensi/kiosk', 'pro' => false],
+                    ['name' => 'Rekap Manual', 'path' => '/presensi', 'pro' => false],
+                ],
             ],
         ];
     }

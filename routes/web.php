@@ -24,6 +24,9 @@ Route::prefix('master')->name('master.')->group(function () {
 // Other main features
 Route::resource('kartu-rfid', KartuRfidController::class);
 Route::resource('rombel-siswa', RombelSiswaController::class)->except(['show', 'edit', 'update']);
+
+Route::get('presensi/kiosk', [PresensiController::class, 'kiosk'])->name('presensi.kiosk');
+Route::post('presensi/scan', [PresensiController::class, 'scan'])->name('presensi.scan');
 Route::resource('presensi', PresensiController::class)->except(['create', 'show', 'edit', 'update', 'destroy']);
 
 

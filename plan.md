@@ -232,12 +232,12 @@ Yang perlu diketahui:
 
 ## 9. Roadmap eksekusi
 
-- [ ] **Fase 0** — clone `TailAdmin/tailadmin-laravel` (lihat bagian 8), pasang & wiring Laravel Fortify ke view Auth bawaan template, tambah kolom `role` ke migration `users`, pastikan login jalan end-to-end.
-- [ ] **Fase 1 — data master**
-  - [ ] Migration & model: `tahun_ajaran`, `rombel`, `siswa`, `rombel_siswa`, `kartu_rfid`, `guru`.
-  - [ ] CRUD siswa (form + upload foto).
-  - [ ] CRUD rombel per tahun ajaran.
-  - [ ] Halaman kelola kartu RFID per siswa (tegakkan aturan 1 siswa = 1 kartu di UI: kalau siswa sudah punya kartu, form jadi mode "ganti kartu", bukan "tambah kartu").
+- [x] **Fase 0** — clone `TailAdmin/tailadmin-laravel` (lihat bagian 8), pasang & wiring Laravel Fortify ke view Auth bawaan template, tambah kolom `role` ke migration `users`, pastikan login jalan end-to-end.
+- [x] **Fase 1 — data master**
+  - [x] Migration & model: `tahun_ajaran`, `rombel`, `siswa`, `rombel_siswa`, `kartu_rfid`, `guru`.
+  - [x] CRUD siswa (form + upload foto).
+  - [x] CRUD rombel per tahun ajaran.
+  - [x] Halaman kelola kartu RFID per siswa (tegakkan aturan 1 siswa = 1 kartu di UI: kalau siswa sudah punya kartu, form jadi mode "ganti kartu", bukan "tambah kartu").
 - [ ] **Fase 2 — presensi**
   - [ ] Endpoint `POST /presensi/scan` sesuai alur di atas.
   - [ ] Halaman kiosk (adaptasi dari prototipe yang sudah dibuat, ganti data dummy dengan Alpine `x-data` + `fetch()` ke endpoint asli — lihat catatan di bagian 7).

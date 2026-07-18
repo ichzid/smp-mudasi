@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sistem Presensi · SMP Muhammadiyah Danau Sijabut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4FAF6;
+    --panel:#FFFFFF;
+    --panel-alt:#F1F8F3;
+    --border:#DCEAE1;
+    --border-strong:#B9DEC7;
+    --ink:#0F2318;
+    --ink-dim:#5E7768;
+    --green:#0E7C3F;
+    --green-dark:#0A5C2E;
+    --green-light:#E6F5EC;
+    --gold:#B98A1F;
+    --gold-light:#F6ECCF;
+    --success:#0E7C3F;
+    --success-bg:#E6F5EC;
+    --error:#C6433F;
+    --error-bg:#FBEAE9;
+    --radius:20px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+  }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(14,124,63,0.07), transparent 42%),
+      radial-gradient(circle at 90% 92%, rgba(185,138,31,0.08), transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* watermark matahari raksasa di belakang, berputar pelan */
+  body::before{
+    content:"";
+    position:fixed;
+    top:50%; left:50%;
+    width:1100px; height:1100px;
+    margin:-550px 0 0 -550px;
+    background: conic-gradient(from 0deg,
+      rgba(14,124,63,0.05) 0deg 10deg, transparent 10deg 30deg,
+      rgba(14,124,63,0.05) 30deg 40deg, transparent 40deg 60deg,
+      rgba(14,124,63,0.05) 60deg 70deg, transparent 70deg 90deg,
+      rgba(14,124,63,0.05) 90deg 100deg, transparent 100deg 120deg,
+      rgba(14,124,63,0.05) 120deg 130deg, transparent 130deg 150deg,
+      rgba(14,124,63,0.05) 150deg 160deg, transparent 160deg 180deg,
+      rgba(14,124,63,0.05) 180deg 190deg, transparent 190deg 210deg,
+      rgba(14,124,63,0.05) 210deg 220deg, transparent 220deg 240deg,
+      rgba(14,124,63,0.05) 240deg 250deg, transparent 250deg 270deg,
+      rgba(14,124,63,0.05) 270deg 280deg, transparent 280deg 300deg,
+      rgba(14,124,63,0.05) 300deg 310deg, transparent 310deg 330deg,
+      rgba(14,124,63,0.05) 330deg 340deg, transparent 340deg 360deg);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:0;
+    animation: spin 120s linear infinite;
+  }
+
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  main.kiosk{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:1000px;
+    display:grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap:20px;
+    align-items:start;
+  }
+
+  @media (max-width: 820px){
+    main.kiosk{ grid-template-columns: 1fr; }
+  }
+
+  .topbar{
+    grid-column: 1 / -1;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:2px 4px 6px;
+    flex-wrap:wrap;
+  }
+
+  .school-id{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .sun-mark{ flex:0 0 auto; }
+
+  .school-name{
+    font-family:'Sora', sans-serif;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:.01em;
+    line-height:1.25;
+  }
+
+  .school-sub{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-top:2px;
+  }
+
+  .clock{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--green-dark);
+    background:var(--green-light);
+    border:1px solid var(--border-strong);
+    padding:6px 12px;
+    border-radius:9px;
+    letter-spacing:.04em;
+  }
+
+  .scanner-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:34px 32px 28px;
+    box-shadow: 0 24px 50px -28px rgba(10,50,25,0.22);
+  }
+
+  .scan-icon{
+    width:54px; height:54px;
+    border-radius:14px;
+    background:linear-gradient(135deg, var(--green), var(--green-dark));
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:20px;
+    box-shadow:0 0 0 6px var(--green-light);
+  }
+
+  h1{
+    font-family:'Sora', sans-serif;
+    font-size:25px;
+    font-weight:700;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+
+  .sub{
+    color:var(--ink-dim);
+    font-size:14px;
+    margin:0 0 24px;
+    line-height:1.55;
+    max-width:44ch;
+  }
+
+  .input-wrap{
+    position:relative;
+    overflow:hidden;
+    border-radius:14px;
+    border:1.5px solid var(--border-strong);
+    background:var(--panel-alt);
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  .input-wrap:focus-within{
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(14,124,63,0.15);
+  }
+
+  .input-wrap.scanning{
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(14,124,63,0.18);
+  }
+
+  .input-wrap.error{
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(198,67,63,0.15);
+    animation: shake .38s;
+  }
+
+  @keyframes shake{
+    10%,90%{ transform:translateX(-2px); }
+    20%,80%{ transform:translateX(3px); }
+    30%,50%,70%{ transform:translateX(-5px); }
+    40%,60%{ transform:translateX(5px); }
+  }
+
+  #codeInput{
+    width:100%;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:var(--ink);
+    font-family:'JetBrains Mono', monospace;
+    font-size:20px;
+    letter-spacing:.18em;
+    text-align:center;
+    padding:19px 16px;
+    text-transform:uppercase;
+  }
+
+  #codeInput::placeholder{
+    color:#9FB8AA;
+    letter-spacing:.18em;
+  }
+
+  .scan-line{
+    position:absolute;
+    top:0; bottom:0; left:-30%;
+    width:30%;
+    background:linear-gradient(90deg, transparent, rgba(14,124,63,0.28), transparent);
+    opacity:0;
+  }
+
+  .input-wrap.scanning .scan-line{
+    opacity:1;
+    animation: sweep .5s linear;
+  }
+
+  @keyframes sweep{
+    from{ left:-30%; }
+    to{ left:100%; }
+  }
+
+  .feedback{
+    min-height:20px;
+    margin-top:14px;
+    font-size:13.5px;
+    text-align:center;
+    font-weight:500;
+  }
+
+  .feedback.error{ color:var(--error); }
+
+  details.hint{
+    margin-top:22px;
+    border-top:1px solid var(--border);
+    padding-top:16px;
+  }
+
+  details.hint summary{
+    cursor:pointer;
+    font-size:13px;
+    color:var(--ink-dim);
+    user-select:none;
+  }
+
+  details.hint summary:hover{ color:var(--green); }
+  details.hint summary:focus-visible{ outline:2px solid var(--green); outline-offset:3px; }
+
+  #sampleList{
+    list-style:none;
+    margin:14px 0 0;
+    padding:0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  #sampleList li{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    background:var(--panel-alt);
+    border:1px solid var(--border);
+    color:var(--ink-dim);
+    padding:7px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.15s;
+  }
+
+  #sampleList li:hover{
+    border-color:var(--green);
+    color:var(--green-dark);
+  }
+  #sampleList li:focus-visible{ outline:2px solid var(--green); outline-offset:2px; }
+
+  .log-panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px 22px;
+    max-height:430px;
+    overflow-y:auto;
+    box-shadow: 0 24px 50px -28px rgba(10,50,25,0.22);
+  }
+
+  .log-panel h2{
+    font-family:'Sora', sans-serif;
+    font-size:14.5px;
+    margin:0 0 16px;
+    color:var(--ink-dim);
+    font-weight:600;
+    letter-spacing:.02em;
+  }
+
+  .log-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+
+  .log-list .empty{
+    color:#A9BFB1;
+    font-size:13.5px;
+    text-align:center;
+    padding:30px 0;
+  }
+
+  .log-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--panel-alt);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 12px;
+    animation: fadeIn .3s ease;
+  }
+
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
+
+  .log-item img{
+    width:34px; height:34px; border-radius:9px; object-fit:cover;
+    border:1px solid var(--border-strong);
+  }
+
+  .log-item .li-name{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  .log-item .li-meta{ font-size:11.5px; color:var(--ink-dim); font-family:'JetBrains Mono', monospace; }
+  .log-item .li-status{
+    margin-left:auto;
+    font-size:10.5px;
+    font-family:'JetBrains Mono', monospace;
+    padding:3px 8px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .li-status.hadir{ background:var(--success-bg); color:var(--green-dark); }
+  .li-status.terlambat{ background:var(--gold-light); color:var(--gold); }
+
+  /* Modal kartu pelajar */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(15,35,24,0.55);
+    backdrop-filter: blur(6px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+
+  .id-card{
+    position:relative;
+    width:100%;
+    max-width:440px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 40px 80px -20px rgba(10,50,25,0.4);
+    animation: eject .38s cubic-bezier(.2,.9,.3,1.2);
+  }
+
+  @keyframes eject{
+    from{ opacity:0; transform:translateY(28px) scale(.96); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .card-header{
+    background:linear-gradient(120deg, var(--green-dark), var(--green));
+    padding:16px 22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+  }
+
+  .card-header .school-name{ color:#fff; font-size:13.5px; }
+  .card-header .school-sub{ color:rgba(255,255,255,0.75); }
+
+  .close-btn{
+    position:absolute;
+    top:14px; right:16px;
+    background:rgba(255,255,255,0.18);
+    border:none;
+    color:#fff;
+    font-size:20px;
+    width:28px; height:28px;
+    border-radius:8px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .close-btn:hover{ background:rgba(255,255,255,0.3); }
+
+  .card-inner{ padding:22px 24px 24px; }
+
+  .ribbon{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--gold-light);
+    color:var(--gold);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    padding:5px 10px;
+    border-radius:7px;
+    margin-bottom:16px;
+  }
+  .ribbon::before{
+    content:"";
+    width:6px; height:6px; border-radius:50%;
+    background:var(--gold);
+  }
+
+  .card-body{
+    display:flex;
+    gap:18px;
+    align-items:flex-start;
+  }
+
+  .photo-wrap{
+    flex:0 0 auto;
+    width:100px; height:100px;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid var(--border);
+    box-shadow:0 0 0 4px var(--green-light);
+  }
+  .photo-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .card-data{ flex:1; min-width:0; }
+
+  .card-data h2{
+    font-family:'Sora', sans-serif;
+    font-size:18px;
+    margin:0 0 12px;
+    line-height:1.25;
+    color:var(--ink);
+  }
+
+  .card-data dl{ margin:0; display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; }
+  .card-data dl div.full{ grid-column:1 / -1; }
+  .card-data dt{
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin:0 0 3px;
+  }
+  .card-data dd{
+    margin:0;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink);
+    word-break:break-word;
+  }
+
+  #modalStatus.hadir{ color:var(--green-dark); }
+  #modalStatus.terlambat{ color:var(--gold); }
+</style>
+</head>
+<body>
+
+<main class="kiosk">
+  <div class="topbar">
+    <div class="school-id">
+      <svg class="sun-mark" width="34" height="34" viewBox="0 0 40 40" fill="none">
+        <g>
+          <circle cx="20" cy="20" r="8" fill="#0E7C3F"/>
+          <circle cx="20" cy="20" r="8" fill="none" stroke="#B98A1F" stroke-width="1.2"/>
+          <g stroke="#0E7C3F" stroke-width="2.4" stroke-linecap="round">
+            <line x1="20" y1="2" x2="20" y2="8"/>
+            <line x1="20" y1="32" x2="20" y2="38"/>
+            <line x1="2" y1="20" x2="8" y2="20"/>
+            <line x1="32" y1="20" x2="38" y2="20"/>
+            <line x1="7" y1="7" x2="11.2" y2="11.2"/>
+            <line x1="28.8" y1="28.8" x2="33" y2="33"/>
+            <line x1="33" y1="7" x2="28.8" y2="11.2"/>
+            <line x1="11.2" y1="28.8" x2="7" y2="33"/>
+            <line x1="13.5" y1="3.6" x2="15.6" y2="9.1"/>
+            <line x1="24.4" y1="30.9" x2="26.5" y2="36.4"/>
+            <line x1="3.6" y1="26.5" x2="9.1" y2="24.4"/>
+            <line x1="30.9" y1="15.6" x2="36.4" y2="13.5"/>
+          </g>
+        </g>
+      </svg>
+      <div>
+        <div class="school-name">SMP MUHAMMADIYAH<br/>DANAU SIJABUT</div>
+        <div class="school-sub">Sistem Presensi Digital</div>
+      </div>
+    </div>
+    <span class="clock" id="clock">--:--:--</span>
+  </div>
+
+  <section class="scanner-card">
+    <div class="scan-icon" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path d="M4 8V6a2 2 0 0 1 2-2h2M18 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M6 20H4a2 2 0 0 1-2-2v-2" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="9" y="9" width="6" height="6" rx="1.4" stroke="white" stroke-width="1.8"/>
+      </svg>
+    </div>
+    <h1>Tempelkan Kartu Pelajar</h1>
+    <p class="sub">Untuk simulasi, ketik kode unik kartu lalu tekan <strong>Enter</strong>. Nantinya kolom ini akan otomatis terisi saat kartu RFID ditempelkan ke alat pembaca di gerbang atau kelas.</p>
+
+    <form id="scanForm" autocomplete="off">
+      <div class="input-wrap" id="inputWrap">
+        <input id="codeInput" type="text" placeholder="• • • • • • • •" autofocus />
+        <div class="scan-line" id="scanLine"></div>
+      </div>
+    </form>
+    <div class="feedback" id="feedback"></div>
+
+    <details class="hint">
+      <summary>Kode contoh untuk uji coba →</summary>
+      <ul id="sampleList"></ul>
+    </details>
+  </section>
+
+  <aside class="log-panel">
+    <h2>Presensi Terakhir</h2>
+    <ul class="log-list" id="logList">
+      <li class="empty">Belum ada presensi hari ini</li>
+    </ul>
+  </aside>
+</main>
+
+<div class="modal-overlay" id="overlay">
+  <div class="id-card">
+    <div class="card-header">
+      <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="8" fill="#ffffff"/>
+        <g stroke="#ffffff" stroke-width="2.4" stroke-linecap="round">
+          <line x1="20" y1="2" x2="20" y2="8"/>
+          <line x1="20" y1="32" x2="20" y2="38"/>
+          <line x1="2" y1="20" x2="8" y2="20"/>
+          <line x1="32" y1="20" x2="38" y2="20"/>
+          <line x1="7" y1="7" x2="11.2" y2="11.2"/>
+          <line x1="28.8" y1="28.8" x2="33" y2="33"/>
+          <line x1="33" y1="7" x2="28.8" y2="11.2"/>
+          <line x1="11.2" y1="28.8" x2="7" y2="33"/>
+        </g>
+      </svg>
+      <div>
+        <div class="school-name">SMP Muhammadiyah Danau Sijabut</div>
+        <div class="school-sub">Kartu Pelajar Digital</div>
+      </div>
+      <button class="close-btn" id="closeBtn" aria-label="Tutup">&times;</button>
+    </div>
+    <div class="card-inner">
+      <span class="ribbon">TERVERIFIKASI</span>
+      <div class="card-body">
+        <div class="photo-wrap"><img id="modalPhoto" src="" alt="Foto siswa" /></div>
+        <div class="card-data">
+          <h2 id="modalName"></h2>
+          <dl>
+            <div><dt>Kelas</dt><dd id="modalClass"></dd></div>
+            <div><dt>NIS</dt><dd id="modalNis"></dd></div>
+            <div><dt>Kode Kartu</dt><dd id="modalCode"></dd></div>
+            <div><dt>Waktu</dt><dd id="modalTime"></dd></div>
+            <div class="full"><dt>Status</dt><dd id="modalStatus"></dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- Data siswa contoh (ganti / ambil dari database sesungguhnya nanti) ----
+  const students = [
+    { code:"04A3F1B2", name:"Aditya Pratama Wijaya", kelas:"VIII A", nis:"23.24.045", photo:"https://i.pravatar.cc/300?img=12" },
+    { code:"0C7E22D9", name:"Sari Melati Kusuma",     kelas:"IX B",   nis:"22.23.078", photo:"https://i.pravatar.cc/300?img=47" },
+    { code:"1F5A88C3", name:"Muhammad Rizky Ramadhan",kelas:"VII C",  nis:"24.25.012", photo:"https://i.pravatar.cc/300?img=33" },
+    { code:"8B2D40E7", name:"Putri Ayu Lestari",       kelas:"IX A",   nis:"23.24.099", photo:"https://i.pravatar.cc/300?img=25" },
+    { code:"3A9C11F4", name:"Bagus Setiawan",          kelas:"VIII B", nis:"23.24.021", photo:"https://i.pravatar.cc/300?img=15" },
+    { code:"E6D3927A", name:"Nadia Ramadhani",         kelas:"VII A",  nis:"24.25.056", photo:"https://i.pravatar.cc/300?img=44" },
+  ];
+
+  const BATAS_TERLAMBAT = { jam: 7, menit: 30 }; // jam masuk sekolah
+
+  const codeInput   = document.getElementById('codeInput');
+  const inputWrap   = document.getElementById('inputWrap');
+  const scanForm    = document.getElementById('scanForm');
+  const feedback    = document.getElementById('feedback');
+  const overlay     = document.getElementById('overlay');
+  const closeBtn    = document.getElementById('closeBtn');
+  const logList     = document.getElementById('logList');
+  const sampleList  = document.getElementById('sampleList');
+  const clockEl     = document.getElementById('clock');
+
+  function tick(){
+    const d = new Date();
+    const pad = n => n.toString().padStart(2,'0');
+    clockEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  students.forEach(s => {
+    const li = document.createElement('li');
+    li.textContent = `${s.code} — ${s.name.split(' ')[0]}`;
+    li.title = 'Klik untuk mengisi kolom kode';
+    li.tabIndex = 0;
+    li.addEventListener('click', () => {
+      codeInput.value = s.code;
+      codeInput.focus();
+    });
+    li.addEventListener('keydown', (e) => { if(e.key === 'Enter') li.click(); });
+    sampleList.appendChild(li);
+  });
+
+  function tentukanStatus(){
+    const now = new Date();
+    const batas = new Date();
+    batas.setHours(BATAS_TERLAMBAT.jam, BATAS_TERLAMBAT.menit, 0, 0);
+    return now > batas ? 'terlambat' : 'hadir';
+  }
+
+  function formatWaktu(date){
+    const pad = n => n.toString().padStart(2,'0');
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} WIB`;
+  }
+
+  function tampilkanSukses(student){
+    const now = new Date();
+    const status = tentukanStatus();
+
+    document.getElementById('modalPhoto').src = student.photo;
+    document.getElementById('modalPhoto').alt = student.name;
+    document.getElementById('modalName').textContent = student.name;
+    document.getElementById('modalClass').textContent = student.kelas;
+    document.getElementById('modalNis').textContent = student.nis;
+    document.getElementById('modalCode').textContent = student.code;
+    document.getElementById('modalTime').textContent = formatWaktu(now);
+
+    const statusEl = document.getElementById('modalStatus');
+    statusEl.textContent = status === 'hadir' ? 'Hadir tepat waktu' : 'Hadir (terlambat)';
+    statusEl.className = status;
+
+    overlay.classList.add('open');
+
+    const empty = logList.querySelector('.empty');
+    if(empty) empty.remove();
+
+    const item = document.createElement('li');
+    item.className = 'log-item';
+    item.innerHTML = `
+      <img src="${student.photo}" alt="${student.name}" />
+      <div>
+        <div class="li-name">${student.name}</div>
+        <div class="li-meta">${student.kelas} · ${formatWaktu(now)}</div>
+      </div>
+      <span class="li-status ${status === 'hadir' ? 'hadir' : 'terlambat'}">${status === 'hadir' ? 'HADIR' : 'TERLAMBAT'}</span>
+    `;
+    logList.prepend(item);
+  }
+
+  function tampilkanError(pesan){
+    inputWrap.classList.remove('error');
+    void inputWrap.offsetWidth;
+    inputWrap.classList.add('error');
+    feedback.textContent = pesan;
+    feedback.className = 'feedback error';
+    setTimeout(() => inputWrap.classList.remove('error'), 400);
+  }
+
+  scanForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const kode = codeInput.value.trim().toUpperCase();
+    if(!kode){ return; }
+
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    inputWrap.classList.add('scanning');
+
+    setTimeout(() => {
+      inputWrap.classList.remove('scanning');
+      const student = students.find(s => s.code === kode);
+
+      if(student){
+        tampilkanSukses(student);
+        codeInput.value = '';
+      } else {
+        tampilkanError('Kartu tidak dikenali. Periksa kembali kode.');
+      }
+    }, 480);
+  });
+
+  function tutupModal(){
+    overlay.classList.remove('open');
+    codeInput.value = '';
+    codeInput.focus();
+  }
+  closeBtn.addEventListener('click', tutupModal);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) tutupModal(); });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && overlay.classList.contains('open')) tutupModal(); });
+
+  codeInput.focus();
+</script>
+
+</body>
+</html>

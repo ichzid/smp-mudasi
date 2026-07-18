@@ -84,7 +84,7 @@
                 <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 dark:border-gray-800">
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                            Anggota Rombel: {{ $rombels->where('id', $rombel_id)->first()->nama_rombel ?? '' }}
+                            Anggota Rombel: {{ $rombels->where('id', $rombel_id)->first()->nama ?? '' }}
                         </h3>
                         <p class="text-sm text-gray-500 mt-1">Total: {{ $rombel_siswas->count() }} siswa terdaftar.</p>
                     </div>
@@ -124,8 +124,8 @@
                                     <td class="px-5 py-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                                @if($rs->siswa->foto)
-                                                    <img src="{{ Storage::url($rs->siswa->foto) }}" alt="{{ $rs->siswa->nama_lengkap }}" class="w-full h-full object-cover">
+                                                @if($rs->siswa->foto_url)
+                                                    <img src="{{ Storage::url($rs->siswa->foto_url) }}" alt="{{ $rs->siswa->nama_lengkap }}" class="w-full h-full object-cover">
                                                 @else
                                                     <div class="w-full h-full flex items-center justify-center text-gray-500">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

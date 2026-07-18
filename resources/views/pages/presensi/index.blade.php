@@ -69,7 +69,7 @@
                             <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Rombel</option>
                             @foreach($rombels as $rombel)
                                 <option value="{{ $rombel->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $rombel_id == $rombel->id ? 'selected' : '' }}>
-                                    Kelas {{ $rombel->tingkat }} - {{ $rombel->nama_rombel }}
+                                    Kelas {{ $rombel->tingkat }} - {{ $rombel->nama }}
                                 </option>
                             @endforeach
                         </select>
@@ -94,7 +94,7 @@
                     <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 dark:border-gray-800">
                         <div>
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                Presensi Kelas: {{ $rombels->where('id', $rombel_id)->first()->nama_rombel ?? '' }}
+                                Presensi Kelas: {{ $rombels->where('id', $rombel_id)->first()->nama ?? '' }}
                             </h3>
                             <p class="text-sm text-gray-500 mt-1">Tanggal: {{ \Carbon\Carbon::parse($tanggal)->format('d F Y') }}</p>
                         </div>
