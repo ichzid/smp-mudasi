@@ -21,8 +21,8 @@ class LaporanController extends Controller
         $tahunAjaran = $this->selectedTahunAjaran($filters['tahun_ajaran_id'] ?? null);
         $rombels = $tahunAjaran ? $this->accessibleRombels($request, $tahunAjaran->id)->get() : collect();
         $rombel = $this->selectedRombel($rombels, $filters['rombel_id'] ?? null);
-        $tanggal = $filters['tanggal'] ?? now()->toDateString();
-        $bulan = $filters['bulan'] ?? now()->format('Y-m');
+        $tanggal = ($filters['tanggal'] ?? null) ?: now()->toDateString();
+        $bulan = ($filters['bulan'] ?? null) ?: now()->format('Y-m');
 
         $rows = $tab === 'bulanan'
             ? $this->monthlyRows($rombel, $bulan)
@@ -79,8 +79,8 @@ class LaporanController extends Controller
         abort_unless($tahunAjaran, 422, 'Tahun ajaran harus dipilih.');
         $rombels = $this->accessibleRombels($request, $tahunAjaran->id)->get();
         $rombel = $this->selectedRombel($rombels, $filters['rombel_id'] ?? null);
-        $tanggal = $filters['tanggal'] ?? now()->toDateString();
-        $bulan = $filters['bulan'] ?? now()->format('Y-m');
+        $tanggal = ($filters['tanggal'] ?? null) ?: now()->toDateString();
+        $bulan = ($filters['bulan'] ?? null) ?: now()->format('Y-m');
 
         return compact('tab', 'tahunAjaran', 'rombel', 'tanggal', 'bulan') + [
             'rows' => $tab === 'bulanan' ? $this->monthlyRows($rombel, $bulan) : $this->dailyRows($rombel, $tanggal),

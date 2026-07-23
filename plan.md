@@ -64,8 +64,8 @@ Catat ini supaya tidak terlewat saat coding:
 | Kolom | Tipe | Catatan |
 |---|---|---|
 | id | bigint PK | |
-| nama | string | contoh: "VII A" |
-| tingkat | string | VII / VIII / IX |
+| nama | string | contoh: "7 A" |
+| tingkat | string | 7 / 8 / 9 |
 | tahun_ajaran_id | FK → tahun_ajaran | |
 | wali_guru_id | FK → guru, nullable | |
 

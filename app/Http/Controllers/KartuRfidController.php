@@ -48,7 +48,7 @@ class KartuRfidController extends Controller
 
         $validated = $request->validate([
             'siswa_id' => 'required|exists:siswa,id|unique:kartu_rfid,siswa_id',
-            'kode_uid' => 'required|string|unique:kartu_rfid,kode_uid',
+            'kode_uid' => ['required', 'string', 'min:4', 'max:32', 'regex:/^[A-Z0-9:-]+$/', 'unique:kartu_rfid,kode_uid'],
             'status' => 'required|in:aktif,nonaktif',
         ]);
         

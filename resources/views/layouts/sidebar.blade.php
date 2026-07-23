@@ -75,15 +75,14 @@
         :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ?
         'xl:justify-center' :
         'justify-start'">
-        <a href="/">
-            <img x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" width="150" height="40" />
-            <img x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                class="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Logo" width="150"
-                height="40" />
-            <img x-show="!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen"
-                src="/images/logo/logo-icon.svg" alt="Logo" width="32" height="32" />
-
+        <a href="/" class="flex items-center gap-3 min-w-0">
+            <span class="flex size-12 shrink-0 items-center justify-center overflow-hidden">
+                <img class="h-full w-full object-contain" src="{{ asset('images/logo/smp_mudasi.png') }}" alt="Logo SMP Muhammadiyah Danau Sijabut" />
+            </span>
+            <span x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
+                class="max-w-[180px] text-sm font-bold leading-tight text-gray-900 dark:text-white">
+                SMP Muhammadiyah<br>Danau Sijabut
+            </span>
         </a>
     </div>
 
@@ -191,35 +190,53 @@
                                         </div>
                                     @else
                                         <!-- Simple Menu Item -->
-                                        <a href="{{ $item['path'] }}" class="menu-item group"
-                                            :class="[
-                                                isActive('{{ $item['path'] }}', {{ !empty($item['exact']) ? 'true' : 'false' }}) ? 'menu-item-active' :
-                                                'menu-item-inactive',
-                                                (!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ?
-                                                'xl:justify-center' :
-                                                'justify-start'
-                                            ]">
-
-                                            <!-- Icon -->
-                                            <span
-                                                :class="isActive('{{ $item['path'] }}', {{ !empty($item['exact']) ? 'true' : 'false' }}) ? 'menu-item-icon-active' :
-                                                    'menu-item-icon-inactive'">
-                                                {!! MenuHelper::getIconSvg($item['icon']) !!}
-                                            </span>
-
-                                            <!-- Text -->
-                                            <span
-                                                x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
-                                                class="menu-item-text flex items-center gap-2">
-                                                {{ $item['name'] }}
-                                                @if (!empty($item['new']))
-                                                    <span
-                                                        class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-brand-500 text-white">
-                                                        new
+                                        @if (($item['method'] ?? 'get') === 'post')
+                                            <form method="POST" action="{{ $item['path'] }}">
+                                                @csrf
+                                                <button type="submit" class="menu-item group w-full"
+                                                    :class="[
+                                                        'menu-item-inactive',
+                                                        (!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ?
+                                                        'xl:justify-center' :
+                                                        'justify-start'
+                                                    ]">
+                                                    <span class="menu-item-icon-inactive">
+                                                        {!! MenuHelper::getIconSvg($item['icon']) !!}
                                                     </span>
-                                                @endif
-                                            </span>
-                                        </a>
+                                                    <span
+                                                        x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
+                                                        class="menu-item-text">
+                                                        {{ $item['name'] }}
+                                                    </span>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <a href="{{ $item['path'] }}" class="menu-item group"
+                                                :class="[
+                                                    isActive('{{ $item['path'] }}', {{ !empty($item['exact']) ? 'true' : 'false' }}) ? 'menu-item-active' :
+                                                    'menu-item-inactive',
+                                                    (!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ?
+                                                    'xl:justify-center' :
+                                                    'justify-start'
+                                                ]">
+                                                <span
+                                                    :class="isActive('{{ $item['path'] }}', {{ !empty($item['exact']) ? 'true' : 'false' }}) ? 'menu-item-icon-active' :
+                                                        'menu-item-icon-inactive'">
+                                                    {!! MenuHelper::getIconSvg($item['icon']) !!}
+                                                </span>
+                                                <span
+                                                    x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
+                                                    class="menu-item-text flex items-center gap-2">
+                                                    {{ $item['name'] }}
+                                                    @if (!empty($item['new']))
+                                                        <span
+                                                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-brand-500 text-white">
+                                                            new
+                                                        </span>
+                                                    @endif
+                                                </span>
+                                            </a>
+                                        @endif
                                     @endif
                                 </li>
                             @endforeach

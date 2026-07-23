@@ -22,6 +22,13 @@ class Siswa extends Model
         'status',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'tanggal_lahir' => 'date',
+        ];
+    }
+
     public function kartuRfid()
     {
         return $this->hasOne(KartuRfid::class);

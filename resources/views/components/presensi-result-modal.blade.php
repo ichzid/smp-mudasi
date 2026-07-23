@@ -1,7 +1,22 @@
 <!-- resources/views/components/presensi-result-modal.blade.php -->
-<div x-show="showResult" 
+<style>
+    .result-modal-card { will-change: transform, opacity; }
+    .result-icon-pop { animation: resultIconPop .55s cubic-bezier(.16,1.35,.4,1) both; }
+    .result-check-path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: resultCheckDraw .55s .25s cubic-bezier(.65,0,.35,1) forwards; }
+    .result-content-rise { animation: resultContentRise .45s .18s ease-out both; }
+    @keyframes resultIconPop { from { opacity:0; transform:scale(.45) rotate(-8deg); } to { opacity:1; transform:scale(1) rotate(0); } }
+    @keyframes resultCheckDraw { to { stroke-dashoffset:0; } }
+    @keyframes resultContentRise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    @media (prefers-reduced-motion: reduce) { .result-icon-pop,.result-check-path,.result-content-rise { animation-duration:.01ms!important; animation-delay:0ms!important; } }
+</style>
+<div x-show="showResult"
+     x-cloak
+     role="dialog"
+     aria-modal="true"
+     :aria-label="resultType === 'success' ? 'Hasil presensi berhasil' : 'Hasil presensi gagal'"
+     @click.self="closeModal()"
      style="display: none;"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/65 p-4 backdrop-blur-md transition-opacity"
      x-transition:enter="ease-out duration-300"
      x-transition:enter-start="opacity-0"
      x-transition:enter-end="opacity-100"
@@ -24,20 +39,16 @@
                  
             <div class="p-6 pt-8 text-center">
                 <!-- Status Icon -->
-                <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full mb-6"
+                <div class="result-icon-pop mx-auto flex items-center justify-center h-20 w-20 rounded-full mb-6"
                      :class="resultData.status === 'hadir' ? 'bg-green-100 text-green-500 dark:bg-green-900/30' : 'bg-yellow-100 text-yellow-500 dark:bg-yellow-900/30'">
                     
-                    <svg x-show="resultData.status === 'hadir'" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    
-                    <svg x-show="resultData.status === 'terlambat'" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path class="result-check-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 
                 <!-- Profile Image -->
-                <div class="mx-auto h-24 w-24 rounded-full border-4 border-white dark:border-gray-800 shadow-md overflow-hidden mb-4 bg-gray-100 dark:bg-gray-700">
+                <div class="result-content-rise mx-auto h-24 w-24 rounded-full border-4 border-white dark:border-gray-800 shadow-md overflow-hidden mb-4 bg-gray-100 dark:bg-gray-700">
                     <template x-if="resultData.foto_url">
                         <img :src="resultData.foto_url" alt="Foto Siswa" class="h-full w-full object-cover">
                     </template>
@@ -50,7 +61,7 @@
                 
                 <!-- Info -->
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white" x-text="resultData.nama"></h3>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1" x-text="resultData.nis + ' • ' + resultData.kelas"></p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1" x-text="resultData.kelas"></p>
                 
                 <div class="mt-6 py-3 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg flex justify-between items-center">
                     <span class="text-sm text-gray-600 dark:text-gray-300">Waktu Scan:</span>

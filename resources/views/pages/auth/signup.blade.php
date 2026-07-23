@@ -152,12 +152,13 @@
                 <div class="z-1 flex items-center justify-center">
                     <!-- ===== Common Grid Shape Start ===== -->
                     <x-common.common-grid-shape />
-                    <div class="flex max-w-xs flex-col items-center">
-                        <a href="/" class="mb-4 block">
-                            <img src="./images/logo/auth-logo.svg" alt="Logo" />
+                    <div class="flex max-w-sm flex-col items-center">
+                        <a href="/" class="mb-5 flex size-36 items-center justify-center overflow-hidden rounded-3xl bg-white p-3 shadow-2xl ring-1 ring-white/20">
+                            <img class="h-full w-full object-contain" src="{{ asset('images/logo/smp_mudasi.png') }}" alt="Logo SMP Muhammadiyah Danau Sijabut">
                         </a>
-                        <p class="text-center text-gray-400 dark:text-white/60">
-                            Free and Open-Source Tailwind CSS Admin Dashboard Template
+                        <h2 class="text-center text-2xl font-bold text-white">SMP Muhammadiyah Danau Sijabut</h2>
+                        <p class="mt-3 text-center text-gray-300 dark:text-white/60">
+                            Sistem Presensi Digital untuk pencatatan kehadiran siswa yang cepat dan terintegrasi.
                         </p>
                     </div>
                 </div>

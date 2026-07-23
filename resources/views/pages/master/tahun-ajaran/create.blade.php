@@ -19,7 +19,7 @@
                     <!-- Nama Tahun Ajaran -->
                     <div>
                         <label for="nama" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tahun Ajaran <span class="text-red-500">*</span></label>
-                        <input type="text" id="nama" name="nama" value="{{ old('nama', date('Y') . '/' . (date('Y') + 1)) }}" required placeholder="Contoh: 2024/2025"
+                        <input type="text" id="nama" name="nama" value="{{ old('nama', date('Y') . '/' . (date('Y') + 1)) }}" required maxlength="50" placeholder="Contoh: 2024/2025"
                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                         @error('nama')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>

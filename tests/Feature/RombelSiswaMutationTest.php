@@ -16,8 +16,8 @@ beforeEach(function () {
 function dataRombelSiswa(): array
 {
     $tahun = TahunAjaran::create(['nama' => '2026/2027', 'semester' => 1, 'is_aktif' => true]);
-    $rombelA = Rombel::create(['nama' => 'VII A', 'tingkat' => 'VII', 'tahun_ajaran_id' => $tahun->id]);
-    $rombelB = Rombel::create(['nama' => 'VII B', 'tingkat' => 'VII', 'tahun_ajaran_id' => $tahun->id]);
+    $rombelA = Rombel::create(['nama' => '7 A', 'tingkat' => '7', 'tahun_ajaran_id' => $tahun->id]);
+    $rombelB = Rombel::create(['nama' => '7 B', 'tingkat' => '7', 'tahun_ajaran_id' => $tahun->id]);
     $siswa = Siswa::create(['nis' => '3001', 'nama_lengkap' => 'Siswa Mutasi', 'jenis_kelamin' => 'P', 'status' => 'aktif']);
 
     return [$tahun, $rombelA, $rombelB, $siswa];

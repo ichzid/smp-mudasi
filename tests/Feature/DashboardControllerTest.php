@@ -24,10 +24,10 @@ test('dashboard hanya menghitung siswa aktif dengan keanggotaan rombel yang vali
         'nama' => '2025/2026', 'semester' => 2, 'is_aktif' => false,
     ]);
     $rombelAktif = DB::table('rombel')->insertGetId([
-        'nama' => 'VII A', 'tingkat' => 'VII', 'tahun_ajaran_id' => $tahunAktif,
+        'nama' => '7 A', 'tingkat' => '7', 'tahun_ajaran_id' => $tahunAktif,
     ]);
     $rombelLama = DB::table('rombel')->insertGetId([
-        'nama' => 'VI A', 'tingkat' => 'VI', 'tahun_ajaran_id' => $tahunLama,
+        'nama' => '6 A', 'tingkat' => '6', 'tahun_ajaran_id' => $tahunLama,
     ]);
 
     $buatSiswa = fn (string $nis, string $status = 'aktif') => DB::table('siswa')->insertGetId([

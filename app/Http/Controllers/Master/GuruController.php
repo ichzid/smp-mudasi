@@ -37,6 +37,10 @@ class GuruController extends Controller
             'jenis_kelamin' => 'required|in:L,P',
             'no_hp' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'foto.image' => 'File yang dipilih harus berupa gambar.',
+            'foto.mimes' => 'Foto harus berformat JPG, JPEG, atau PNG.',
+            'foto.max' => 'Ukuran foto tidak boleh lebih dari 2 MB.',
         ]);
 
         if ($request->hasFile('foto')) {
@@ -80,6 +84,10 @@ class GuruController extends Controller
             'jenis_kelamin' => 'required|in:L,P',
             'no_hp' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'foto.image' => 'File yang dipilih harus berupa gambar.',
+            'foto.mimes' => 'Foto harus berformat JPG, JPEG, atau PNG.',
+            'foto.max' => 'Ukuran foto tidak boleh lebih dari 2 MB.',
         ]);
 
         if ($request->hasFile('foto')) {

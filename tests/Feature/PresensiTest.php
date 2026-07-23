@@ -30,7 +30,7 @@ function dataPresensi(?User $wali = null): array
         'user_id' => $wali?->id, 'created_at' => now(), 'updated_at' => now(),
     ]);
     $rombelId = DB::table('rombel')->insertGetId([
-        'nama' => 'VII A', 'tingkat' => 'VII', 'tahun_ajaran_id' => $tahunId,
+        'nama' => '7 A', 'tingkat' => '7', 'tahun_ajaran_id' => $tahunId,
         'wali_guru_id' => $guruId, 'created_at' => now(), 'updated_at' => now(),
     ]);
     $siswaId = DB::table('siswa')->insertGetId([

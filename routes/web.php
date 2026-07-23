@@ -9,7 +9,10 @@ use App\Http\Controllers\Master\SiswaController;
 use App\Http\Controllers\Master\TahunAjaranController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\RombelSiswaController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
 
 Route::get('presensi/kiosk', [PresensiController::class, 'kiosk'])->name('presensi.kiosk');
 Route::post('presensi/scan', [PresensiController::class, 'scan'])
@@ -39,7 +42,27 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/calendar', fn () => view('pages.calender', ['title' => 'Calendar']))->name('calendar');
-    Route::get('/profile', fn () => view('pages.profile', ['title' => 'Profile']))->name('profile');
+    Route::get('/profile', fn () => view('pages.profile', ['title' => 'Profil Saya']))->name('profile');
+    Route::put('/profile', function (Request $request) {
+        $user = $request->user();
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'current_password' => ['nullable', 'required_with:password', 'current_password'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+
+        if (! empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('profile')->with('success', 'Profil berhasil diperbarui.');
+    })->name('profile.update');
     Route::get('/form-elements', fn () => view('pages.form.form-elements', ['title' => 'Form Elements']))->name('form-elements');
     Route::get('/basic-tables', fn () => view('pages.tables.basic-tables', ['title' => 'Basic Tables']))->name('basic-tables');
     Route::get('/blank', fn () => view('pages.blank', ['title' => 'Blank']))->name('blank');

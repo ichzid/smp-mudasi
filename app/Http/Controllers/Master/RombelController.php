@@ -50,7 +50,7 @@ class RombelController extends Controller
     {
         $validated = $request->validate([
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
-            'tingkat' => 'required|in:VII,VIII,IX',
+            'tingkat' => 'required|in:7,8,9',
             'nama' => 'required|string|max:50',
             'wali_guru_id' => [
                 'required',
@@ -101,7 +101,7 @@ class RombelController extends Controller
         
         $validated = $request->validate([
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
-            'tingkat' => 'required|in:VII,VIII,IX',
+            'tingkat' => 'required|in:7,8,9',
             'nama' => 'required|string|max:50',
             'wali_guru_id' => [
                 'required',

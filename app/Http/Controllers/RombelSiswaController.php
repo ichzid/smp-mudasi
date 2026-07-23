@@ -27,7 +27,8 @@ class RombelSiswaController extends Controller
 
         if ($tahun_ajaran_id) {
             $rombels = Rombel::where('tahun_ajaran_id', $tahun_ajaran_id)
-                ->orderBy('tingkat')
+                ->orderByRaw("CASE tingkat WHEN '7' THEN 1 WHEN '8' THEN 2 WHEN '9' THEN 3 ELSE 4 END")
+                ->orderByRaw('LENGTH(nama)')
                 ->orderBy('nama')
                 ->get();
         }

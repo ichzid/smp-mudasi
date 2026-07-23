@@ -15,6 +15,16 @@ class Rombel extends Model
         'wali_guru_id',
     ];
 
+    public function getLabelAttribute(): string
+    {
+        return $this->nama === $this->tingkat ? $this->nama : $this->tingkat.' '.$this->nama;
+    }
+
+    public function getSelectLabelAttribute(): string
+    {
+        return 'Kelas '.$this->tingkat.' - '.$this->nama;
+    }
+
     public function tahunAjaran()
     {
         return $this->belongsTo(TahunAjaran::class);

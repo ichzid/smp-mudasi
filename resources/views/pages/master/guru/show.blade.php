@@ -65,7 +65,7 @@
                                     <div class="mt-2 flex flex-wrap gap-2">
                                         @foreach($guru->rombel as $r)
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
-                                                Kelas {{ $r->tingkat }} ({{ $r->nama_rombel }}) - TA {{ $r->tahunAjaran->nama }}
+                                                Kelas {{ $r->label }} - TA {{ $r->tahunAjaran->nama }}
                                             </span>
                                         @endforeach
                                     </div>

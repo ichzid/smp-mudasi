@@ -38,7 +38,7 @@
                         name="tanggal"
                         label="Tanggal"
                         placeholder="Pilih tanggal"
-                        :default-date="$tanggal"
+                        :defaultDate="$tanggal"
                         @date-change="$el.closest('form').submit()"
                     />
                 </div>
@@ -70,11 +70,11 @@
                     <div x-data="{ isOptionSelected: true }" class="relative z-20 bg-transparent">
                         <select id="rombel_id" name="rombel_id" 
                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800 dark:text-white/90" 
-                            onchange="this.form.submit()" {{ !$tahun_ajaran_id ? 'disabled' : '' }} @change="isOptionSelected = true">
+                            onchange="this.form.submit()" {{ $rombels->isEmpty() ? 'disabled' : '' }} @change="isOptionSelected = true">
                             <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Rombel</option>
                             @foreach($rombels as $rombel)
                                 <option value="{{ $rombel->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $rombel_id == $rombel->id ? 'selected' : '' }}>
-                                    Kelas {{ $rombel->tingkat }} - {{ $rombel->nama }}
+                                    {{ $rombel->select_label }}
                                 </option>
                             @endforeach
                         </select>
@@ -93,7 +93,13 @@
                 @csrf
                 <input type="hidden" name="rombel_id" value="{{ $rombel_id }}">
                 <input type="hidden" name="tanggal" value="{{ $tanggal }}">
-                
+
+                @if($errors->has('presensi'))
+                    <div class="mb-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400">
+                        {{ $errors->first('presensi') }}
+                    </div>
+                @endif
+
                 <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
                     <!-- Header -->
                     <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 dark:border-gray-800">
@@ -218,6 +224,8 @@
                                                         Alpa
                                                     </div>
                                                 </label>
+                                                </div>
+                                                <div data-validation-error class="text-center"></div>
                                             </div>
                                         </td>
                                         <td class="px-5 py-4 text-right text-sm">

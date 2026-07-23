@@ -16,7 +16,10 @@
                 mode: '{{ $mode }}',
                 static: true,
                 monthSelectorType: 'static',
+                locale: window.flatpickrIndonesian,
                 dateFormat: '{{ $dateFormat }}',
+                altInput: '{{ $mode }}' === 'single',
+                altFormat: 'd m Y',
                 defaultDate: {{ $defaultDate ? (is_array($defaultDate) ? json_encode($defaultDate) : "'" . $defaultDate . "'") : 'null' }},
                 onChange: (selectedDates, dateStr, instance) => {
                     this.$dispatch('date-change', {
@@ -47,9 +50,11 @@
             type="text"
             id="{{ $id }}"
             name="{{ $name }}"
+            value="{{ is_array($defaultDate) ? implode(', ', $defaultDate) : $defaultDate }}"
             placeholder="{{ $placeholder }}"
             class="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
             autocomplete="off"
+            data-date-format="{{ $dateFormat }}"
             {{ $attributes->except(['class', 'x-on:date-change', '@date-change']) }}
         />
         <span class="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">

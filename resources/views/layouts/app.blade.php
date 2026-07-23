@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Dashboard' }} | TailAdmin - Laravel Tailwind CSS Admin Dashboard Template</title>
+    <title>{{ $title ?? 'Dashboard' }} | SMP Muhammadiyah Danau Sijabut</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo/smp_mudasi.png') }}">
     <!-- DataTables Overrides untuk Tailwind Theme -->
     <style>
         /* Sembunyikan default border dari DataTables */
@@ -257,6 +258,55 @@
         
         .dark table.dataTable tbody td {
             color: #d1d5db !important; /* text-gray-300 */
+        }
+
+        /* DataTables 2: teks kontrol, informasi, dan pagination */
+        div.dt-container .dt-length,
+        div.dt-container .dt-search,
+        div.dt-container .dt-info,
+        div.dt-container .dt-paging,
+        div.dt-container .dt-length label,
+        div.dt-container .dt-search label {
+            color: #475467 !important;
+        }
+
+        .dark div.dt-container .dt-length,
+        .dark div.dt-container .dt-search,
+        .dark div.dt-container .dt-info,
+        .dark div.dt-container .dt-paging,
+        .dark div.dt-container .dt-length label,
+        .dark div.dt-container .dt-search label {
+            color: #f2f4f7 !important;
+        }
+
+        .dark div.dt-container .dt-input {
+            color: #f2f4f7 !important;
+            background-color: #101828 !important;
+            border-color: #344054 !important;
+        }
+
+        div.dt-container .dt-paging .dt-paging-button {
+            color: #475467 !important;
+        }
+
+        .dark div.dt-container .dt-paging .dt-paging-button,
+        .dark div.dt-container .dt-paging .dt-paging-button.disabled,
+        .dark div.dt-container .dt-paging .dt-paging-button.disabled:hover,
+        .dark div.dt-container .dt-paging .dt-paging-button.disabled:active {
+            color: #f2f4f7 !important;
+        }
+
+        .dark div.dt-container .dt-paging .dt-paging-button:hover:not(.disabled):not(.current) {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: #475467 !important;
+        }
+
+        .dark div.dt-container .dt-paging .dt-paging-button.current,
+        .dark div.dt-container .dt-paging .dt-paging-button.current:hover {
+            color: #ffffff !important;
+            background: #465fff !important;
+            border-color: #465fff !important;
         }
     </style>
     @stack('styles')

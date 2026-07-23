@@ -63,7 +63,7 @@
                             <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Rombel</option>
                             @foreach($rombels as $rombel)
                                 <option value="{{ $rombel->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $rombel_id == $rombel->id ? 'selected' : '' }}>
-                                    Kelas {{ $rombel->tingkat }} - {{ $rombel->nama }}
+                                    {{ $rombel->select_label }}
                                 </option>
                             @endforeach
                         </select>

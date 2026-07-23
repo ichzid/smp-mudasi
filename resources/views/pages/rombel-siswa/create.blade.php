@@ -14,7 +14,7 @@
         <div class="mb-6 bg-brand-50 dark:bg-brand-900/20 p-5 rounded-2xl border border-brand-100 dark:border-brand-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
                 <p class="text-sm font-medium text-brand-600 dark:text-brand-400 mb-1">Menambahkan siswa ke:</p>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $rombel->nama }} (Kelas {{ $rombel->tingkat }})</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Kelas {{ $rombel->label }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Tahun Ajaran: {{ $rombel->tahunAjaran->nama }} - Semester {{ $rombel->tahunAjaran->semester == 1 ? 'Ganjil' : 'Genap' }}</p>
             </div>
             <a href="{{ route('rombel-siswa.index', ['tahun_ajaran_id' => $rombel->tahun_ajaran_id, 'rombel_id' => $rombel->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-all">
@@ -33,7 +33,7 @@
                         name="tanggal_masuk"
                         label="Tanggal Masuk (Efektif) *"
                         placeholder="Pilih tanggal masuk"
-                        :default-date="old('tanggal_masuk', date('Y-m-d'))"
+                        :defaultDate="old('tanggal_masuk', date('Y-m-d'))"
                         required
                     />
                     @error('tanggal_masuk')
@@ -106,6 +106,8 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+                <div data-validation-error></div>
                 </div>
 
                 <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-800">

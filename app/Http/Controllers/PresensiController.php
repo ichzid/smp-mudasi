@@ -23,17 +23,19 @@ class PresensiController extends Controller
             'rombel_id' => ['nullable', 'exists:rombel,id'],
         ]);
 
-        $tanggal = $filters['tanggal'] ?? date('Y-m-d');
-        $tahun_ajaran_id = $filters['tahun_ajaran_id'] ?? null;
-        $rombel_id = $filters['rombel_id'] ?? null;
+        $tanggal = ($filters['tanggal'] ?? null) ?: now()->toDateString();
         $tahun_ajarans = TahunAjaran::latest()->get();
+        $tahun_ajaran_id = ($filters['tahun_ajaran_id'] ?? null)
+            ?: optional($tahun_ajarans->firstWhere('is_aktif', true))->id;
+        $rombel_id = $filters['rombel_id'] ?? null;
         $rombels = collect();
         $presensi_data = collect();
 
         if ($tahun_ajaran_id) {
             $rombels = $this->accessibleRombels($request)
                 ->where('tahun_ajaran_id', $tahun_ajaran_id)
-                ->orderBy('tingkat')
+                ->orderByRaw("CASE tingkat WHEN '7' THEN 1 WHEN '8' THEN 2 WHEN '9' THEN 3 ELSE 4 END")
+                ->orderByRaw('LENGTH(nama)')
                 ->orderBy('nama')
                 ->get();
         }
@@ -145,7 +147,7 @@ class PresensiController extends Controller
                 'nama' => $siswa->nama_lengkap,
                 'nis' => $siswa->nis,
                 'foto_url' => $siswa->foto_url ? asset('storage/'.$siswa->foto_url) : null,
-                'kelas' => $rombel_siswa->rombel->tingkat.' '.$rombel_siswa->rombel->nama,
+                'kelas' => $rombel_siswa->rombel->label,
                 'waktu' => $presensi->waktu_scan,
                 'status' => $presensi->status,
                 'pesan' => $baru ? 'Berhasil melakukan presensi.' : 'Anda sudah melakukan presensi hari ini.',
