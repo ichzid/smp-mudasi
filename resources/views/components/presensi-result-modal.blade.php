@@ -1,13 +1,16 @@
 <!-- resources/views/components/presensi-result-modal.blade.php -->
 <style>
     .result-modal-card { will-change: transform, opacity; }
-    .result-icon-pop { animation: resultIconPop .55s cubic-bezier(.16,1.35,.4,1) both; }
-    .result-check-path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: resultCheckDraw .55s .25s cubic-bezier(.65,0,.35,1) forwards; }
+    .swal-success-icon { position:relative; width:80px; height:80px; border:4px solid #a5dc86; border-radius:50%; animation:swalIconPop .5s cubic-bezier(.175,.885,.32,1.275) both; }
+    .swal-success-line { position:absolute; display:block; height:5px; border-radius:3px; background:#a5dc86; }
+    .swal-success-line-tip { width:25px; left:14px; top:46px; transform:rotate(45deg); animation:swalTip .75s .2s ease both; }
+    .swal-success-line-long { width:47px; right:8px; top:38px; transform:rotate(-45deg); animation:swalLong .75s .2s ease both; }
     .result-content-rise { animation: resultContentRise .45s .18s ease-out both; }
-    @keyframes resultIconPop { from { opacity:0; transform:scale(.45) rotate(-8deg); } to { opacity:1; transform:scale(1) rotate(0); } }
-    @keyframes resultCheckDraw { to { stroke-dashoffset:0; } }
+    @keyframes swalIconPop { 0%{opacity:0;transform:rotate(-45deg) scale(.35)} 60%{opacity:1;transform:rotate(0) scale(1.08)} 100%{transform:scale(1)} }
+    @keyframes swalTip { 0%{width:0;left:1px;top:19px} 54%{width:0;left:1px;top:19px} 70%{width:50px;left:-8px;top:37px} 84%{width:17px;left:21px;top:48px} 100%{width:25px;left:14px;top:46px} }
+    @keyframes swalLong { 0%{width:0;right:46px;top:54px} 65%{width:0;right:46px;top:54px} 84%{width:55px;right:0;top:35px} 100%{width:47px;right:8px;top:38px} }
     @keyframes resultContentRise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-    @media (prefers-reduced-motion: reduce) { .result-icon-pop,.result-check-path,.result-content-rise { animation-duration:.01ms!important; animation-delay:0ms!important; } }
+    @media (prefers-reduced-motion: reduce) { .swal-success-icon,.swal-success-line,.result-content-rise { animation-duration:.01ms!important; animation-delay:0ms!important; } }
 </style>
 <div x-show="showResult"
      x-cloak
@@ -34,17 +37,13 @@
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
              
-            <div class="absolute top-0 left-0 w-full h-2" 
-                 :class="resultData.status === 'hadir' ? 'bg-green-500' : 'bg-yellow-500'"></div>
+            <div class="absolute top-0 left-0 h-2 w-full bg-green-500"></div>
                  
             <div class="p-6 pt-8 text-center">
                 <!-- Status Icon -->
-                <div class="result-icon-pop mx-auto flex items-center justify-center h-20 w-20 rounded-full mb-6"
-                     :class="resultData.status === 'hadir' ? 'bg-green-100 text-green-500 dark:bg-green-900/30' : 'bg-yellow-100 text-yellow-500 dark:bg-yellow-900/30'">
-                    
-                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path class="result-check-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
+                <div class="swal-success-icon mx-auto mb-6" aria-hidden="true">
+                    <span class="swal-success-line swal-success-line-tip"></span>
+                    <span class="swal-success-line swal-success-line-long"></span>
                 </div>
                 
                 <!-- Profile Image -->
@@ -68,8 +67,7 @@
                     <span class="text-lg font-bold font-mono text-gray-900 dark:text-white" x-text="resultData.waktu"></span>
                 </div>
                 
-                <p class="mt-4 text-sm font-medium" 
-                   :class="resultData.status === 'hadir' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'"
+                <p class="mt-4 text-sm font-medium text-green-600 dark:text-green-400"
                    x-text="resultMessage">
                 </p>
             </div>

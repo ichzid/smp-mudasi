@@ -147,7 +147,7 @@ class PresensiController extends Controller
                 'nama' => $siswa->nama_lengkap,
                 'nis' => $siswa->nis,
                 'foto_url' => $siswa->foto_url ? asset('storage/'.$siswa->foto_url) : null,
-                'kelas' => $rombel_siswa->rombel->label,
+                'kelas' => 'Kelas '.$rombel_siswa->rombel->label,
                 'waktu' => $presensi->waktu_scan,
                 'status' => $presensi->status,
                 'pesan' => $baru ? 'Berhasil melakukan presensi.' : 'Anda sudah melakukan presensi hari ini.',

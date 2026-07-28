@@ -68,24 +68,15 @@
     .feedback { min-height:24px; margin-top:18px; color:var(--brand-deep); font-size:14px; font-weight:750; }
     .scanner.error .feedback { color:var(--danger); }
     .scanner-view { position:relative; z-index:1; width:100%; display:flex; flex-direction:column; align-items:center; }
-    .result-check { width:112px; height:112px; display:grid; place-items:center; margin-bottom:20px; border-radius:50%; color:#16a34a; background:rgba(34,197,94,.13); box-shadow:0 0 0 14px rgba(34,197,94,.07); animation:check-pop .5s cubic-bezier(.2,1.5,.5,1); }
-    .result-check svg { width:58px; height:58px; stroke-dasharray:48; stroke-dashoffset:48; animation:check-draw .55s .25s ease forwards; }
-    .student-card { width:min(520px,100%); display:flex; align-items:center; gap:18px; margin-top:22px; padding:16px 20px; border:1px solid var(--line); border-radius:20px; background:var(--surface-solid); text-align:left; animation:result-up .45s .12s both ease-out; }
-    .student-photo { width:72px; height:72px; flex:none; display:grid; place-items:center; overflow:hidden; border-radius:18px; background:var(--brand-soft); color:var(--brand); }
-    .student-photo img { width:100%; height:100%; object-fit:cover; }
-    .student-photo svg { width:36px; height:36px; }
-    .student-info { min-width:0; flex:1; }
-    .student-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:clamp(17px,2vw,22px); font-weight:850; }
-    .student-class { margin-top:4px; color:var(--muted); font-size:13px; font-weight:650; }
-    .student-scan { flex:none; text-align:right; }
-    .student-time { font-size:20px; font-weight:850; font-variant-numeric:tabular-nums; }
-    .student-status { display:inline-block; margin-top:5px; padding:5px 8px; border-radius:8px; color:#15803d; background:rgba(34,197,94,.13); font-size:9px; font-weight:850; letter-spacing:.08em; }
-    .student-status.terlambat { color:var(--warning); background:rgba(245,158,11,.15); }
-    .error-visual { width:100px; height:100px; display:grid; place-items:center; margin-bottom:22px; border-radius:50%; color:var(--danger); background:rgba(239,68,68,.12); animation:check-pop .4s ease-out; }
-    .error-visual svg { width:48px; height:48px; }
-    @keyframes check-pop { from{opacity:0;transform:scale(.5)} to{opacity:1;transform:scale(1)} }
-    @keyframes check-draw { to{stroke-dashoffset:0} }
-    @keyframes result-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .kiosk-result-popup { border-radius:24px; background:var(--surface-solid); color:var(--text); }
+    .kiosk-result-popup .swal2-title, .kiosk-result-popup .swal2-html-container { color:var(--text); }
+    .kiosk-result-card { display:grid; grid-template-columns:72px minmax(0,1fr); gap:16px; align-items:center; margin-top:8px; padding:16px; border:1px solid rgba(34,197,94,.35); border-left:5px solid #22c55e; border-radius:18px; background:var(--surface); text-align:left; }
+    .kiosk-result-photo { width:72px; height:72px; display:grid; place-items:center; overflow:hidden; border-radius:16px; background:var(--brand-soft); color:var(--brand-deep); font-size:34px; }
+    .kiosk-result-photo img { width:100%; height:100%; object-fit:cover; }
+    .kiosk-result-name { overflow:hidden; text-overflow:ellipsis; font-size:20px; font-weight:850; }
+    .kiosk-result-meta { margin-top:4px; color:var(--muted); font-size:13px; }
+    .kiosk-result-status { margin-top:10px; color:#15803d; font-size:13px; font-weight:800; }
+    :root.dark .kiosk-result-status { color:#4ade80; }
     .recent { padding:clamp(22px,2.6vw,32px); display:flex; flex-direction:column; min-height:0; }
     .recent-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding-bottom:20px; border-bottom:1px solid var(--line); }
     .recent h2 { margin:0; font-size:18px; letter-spacing:-.02em; }
@@ -106,12 +97,12 @@
     @keyframes pulse { 50%{opacity:.4} }
     @keyframes enter { from{opacity:0;transform:translateY(-8px)} }
     @media (max-width:900px) { .content{grid-template-columns:1fr}.scanner{min-height:470px}.recent{min-height:300px}.log-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.empty{grid-column:1/-1;min-height:180px} }
-    @media (max-width:600px) { .shell{padding:14px;gap:14px}.topbar{align-items:flex-start;gap:10px}.brand{gap:9px}.brand-mark{width:50px;height:50px}.brand-name{font-size:12px}.brand-sub,.date,.connection span:last-child{display:none}.datetime{gap:6px}.clock{font-size:19px}.top-actions{gap:6px}.connection{width:38px;min-height:38px;padding:0;justify-content:center}.icon-button{width:38px;height:38px}.scanner{min-height:min(500px,76svh);padding:72px 18px 60px;border-radius:24px}.scanner-status{top:18px;left:18px}.feature-pills{top:18px;right:18px}.feature-pill{width:34px;padding:0;justify-content:center}.feature-pill span{display:none}.scanner-foot{right:18px;bottom:16px;left:18px}.scanner-foot span:last-child{display:none}.tap-visual{width:min(180px,52vw);margin-bottom:20px}.result-check{width:90px;height:90px}.student-card{gap:12px;padding:13px}.student-photo{width:58px;height:58px;border-radius:14px}.student-scan{display:none}.recent{border-radius:24px}.log-list{grid-template-columns:1fr}.empty{min-height:150px} }
+    @media (max-width:600px) { .shell{padding:14px;gap:14px}.topbar{align-items:flex-start;gap:10px}.brand{gap:9px}.brand-mark{width:50px;height:50px}.brand-name{font-size:12px}.brand-sub,.date,.connection span:last-child{display:none}.datetime{gap:6px}.clock{font-size:19px}.top-actions{gap:6px}.connection{width:38px;min-height:38px;padding:0;justify-content:center}.icon-button{width:38px;height:38px}.scanner{min-height:min(500px,76svh);padding:72px 18px 60px;border-radius:24px}.scanner-status{top:18px;left:18px}.feature-pills{top:18px;right:18px}.feature-pill{width:34px;padding:0;justify-content:center}.feature-pill span{display:none}.scanner-foot{right:18px;bottom:16px;left:18px}.scanner-foot span:last-child{display:none}.tap-visual{width:min(180px,52vw);margin-bottom:20px}.kiosk-result-card{grid-template-columns:58px minmax(0,1fr);gap:12px;padding:13px}.kiosk-result-photo{width:58px;height:58px;border-radius:14px}.recent{border-radius:24px}.log-list{grid-template-columns:1fr}.empty{min-height:150px} }
     @media (max-width:390px) { .brand-name{max-width:105px}.scanner{min-height:390px}.top-actions{position:absolute;right:14px;top:62px}.content{margin-top:34px} }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important} }
 </style>
 
-<main class="shell" x-data="kioskData()" x-init="init()" @keydown.escape.window="closeModal()">
+<main class="shell" x-data="kioskData()" x-init="init()">
     <input class="sr-scanner" type="text" x-ref="rfidInput" x-model="rfidCode" @keydown.enter.prevent="processScan()" @blur="restoreFocus()" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Pembaca kartu RFID">
 
     <header class="topbar">
@@ -179,18 +170,17 @@
         </aside>
     </div>
 
-    <x-presensi-result-modal />
 </main>
 
 <script>
 function kioskData() {
     return {
         currentTime: '--:--:--', currentDate: '', rfidCode: '', scannerState: 'ready',
-        feedbackMsg: '', showResult: false, resultData: null, resultType: 'success', resultMessage: '',
-        recentScans: [], timer: null, focusTimer: null, isDark: document.documentElement.classList.contains('dark'),
+        feedbackMsg: '', resultData: null, modalActive: false,
+        recentScans: [], focusTimer: null, isDark: document.documentElement.classList.contains('dark'),
         isOnline: navigator.onLine, isFullscreen: Boolean(document.fullscreenElement), fullscreenSupported: Boolean(document.fullscreenEnabled),
         get isProcessing() { return this.scannerState === 'processing'; },
-        get isLocked() { return this.isProcessing || this.showResult; },
+        get isLocked() { return this.isProcessing || this.modalActive; },
         get statusLabel() { return { ready:'Siap tempel', processing:'Membaca kartu', success:'Presensi berhasil', error:'Pemindaian gagal' }[this.scannerState]; },
         get headline() { return { ready:'Tempelkan Kartu Pelajar', processing:'Kartu Sedang Dibaca', success:'Presensi Tercatat', error:'Kartu Belum Terbaca' }[this.scannerState]; },
         get instruction() { if (!this.isOnline) return 'Perangkat sedang offline. Periksa koneksi sebelum memindai kembali.'; return this.scannerState === 'processing' ? 'Mohon tunggu dan jangan tempelkan kartu lain.' : 'Dekatkan kartu RFID ke alat pembaca, lalu tunggu hingga hasil tampil.'; },
@@ -207,7 +197,7 @@ function kioskData() {
         updateClock() { const now=new Date(); const timezone='Asia/Jakarta'; this.currentTime=now.toLocaleTimeString('id-ID',{timeZone:timezone,hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}); this.currentDate=now.toLocaleDateString('id-ID',{timeZone:timezone,weekday:'long',day:'2-digit',month:'long',year:'numeric'}); },
         toggleTheme() { this.isDark=!this.isDark; document.documentElement.classList.toggle('dark',this.isDark); localStorage.setItem('theme',this.isDark?'dark':'light'); this.restoreFocus(); },
         async toggleFullscreen() { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch (_) { this.feedbackMsg='Layar penuh tidak dapat diaktifkan pada browser ini.'; } finally { this.restoreFocus(); } },
-        restoreFocus() { if (this.isProcessing) return; clearTimeout(this.focusTimer); this.focusTimer=setTimeout(() => { if (!this.isProcessing && this.$refs.rfidInput) this.$refs.rfidInput.focus({preventScroll:true}); }, 40); },
+        restoreFocus() { if (this.isLocked) return; clearTimeout(this.focusTimer); this.focusTimer=setTimeout(() => { if (!this.isLocked && this.$refs.rfidInput) this.$refs.rfidInput.focus({preventScroll:true}); }, 40); },
         async processScan() {
             if (this.isLocked) { this.rfidCode=''; return; }
             const code=this.rfidCode.trim().toUpperCase(); this.rfidCode='';
@@ -216,15 +206,30 @@ function kioskData() {
             try {
                 const response=await fetch('{{ route("presensi.scan") }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json'},body:JSON.stringify({kode_uid:code})});
                 const data=await response.json().catch(() => ({}));
-                if (response.ok && data.success) this.showSuccess(data.data); else this.showError(data.message || 'Kartu tidak dikenali. Silakan coba kembali.');
-            } catch (_) { this.showError('Server tidak dapat dihubungi. Periksa koneksi jaringan.'); }
-            finally { this.rfidCode=''; this.restoreFocus(); }
+                if (response.ok && data.success) await this.showSuccess(data.data); else await this.showError(data.message || 'Kartu tidak dikenali. Silakan coba kembali.');
+            } catch (_) { await this.showError('Server tidak dapat dihubungi. Periksa koneksi jaringan.'); }
+            finally { this.resetScanner(); }
         },
-        showSuccess(data) { this.scannerState='success'; this.feedbackMsg=data.pesan; this.resultData=data; this.resultType='success'; this.resultMessage=data.pesan; this.addToRecentLog(data); this.openModal(5500); },
-        showError(message) { this.scannerState='error'; this.feedbackMsg=message; this.resultData=null; this.resultType='error'; this.resultMessage=message; this.openModal(4000); },
+        buildResultContent(data) {
+            const card=document.createElement('div'); card.className='kiosk-result-card';
+            const photo=document.createElement('div'); photo.className='kiosk-result-photo';
+            if (data.foto_url) { const image=document.createElement('img'); image.src=data.foto_url; image.alt=`Foto ${data.nama || 'siswa'}`; photo.append(image); } else { photo.textContent='👤'; photo.setAttribute('aria-hidden','true'); }
+            const details=document.createElement('div');
+            const name=document.createElement('div'); name.className='kiosk-result-name'; name.textContent=data.nama || 'Siswa';
+            const meta=document.createElement('div'); meta.className='kiosk-result-meta'; meta.textContent=`${data.kelas || '-'} · ${data.waktu || '-'}`;
+            const status=document.createElement('div'); status.className='kiosk-result-status'; status.textContent=data.pesan || (data.status === 'terlambat' ? 'Presensi terlambat tercatat' : 'Presensi berhasil tercatat');
+            details.append(name,meta,status); card.append(photo,details); return card;
+        },
+        async showSuccess(data) {
+            this.scannerState='success'; this.feedbackMsg=data.pesan; this.resultData=data; this.modalActive=true; this.addToRecentLog(data);
+            await Swal.fire({icon:'success',title:'Presensi Tercatat',html:this.buildResultContent(data),showConfirmButton:false,timer:5500,timerProgressBar:true,allowOutsideClick:false,allowEscapeKey:true,customClass:{popup:'kiosk-result-popup'}});
+        },
+        async showError(message) {
+            this.scannerState='error'; this.feedbackMsg=message; this.resultData=null; this.modalActive=true;
+            await Swal.fire({icon:'error',title:'Presensi Gagal',text:message,confirmButtonText:'Tutup',timer:4000,timerProgressBar:true,allowOutsideClick:false,allowEscapeKey:true,customClass:{popup:'kiosk-result-popup'}});
+        },
         addToRecentLog(data) { const scan={key:data.nis+'-'+Date.now(),id:data.nis,nama:data.nama,kelas:data.kelas,waktu:data.waktu,status:data.status,foto_url:data.foto_url}; this.recentScans.unshift(scan); this.recentScans=this.recentScans.slice(0,6); },
-        openModal(delay) { clearTimeout(this.timer); this.showResult=true; this.timer=setTimeout(() => this.closeModal(),delay); },
-        closeModal() { if (!this.showResult) return; this.showResult=false; clearTimeout(this.timer); this.timer=setTimeout(() => { this.scannerState='ready'; this.feedbackMsg=''; this.resultData=null; this.resultMessage=''; this.rfidCode=''; this.restoreFocus(); },300); }
+        resetScanner() { this.modalActive=false; this.scannerState='ready'; this.feedbackMsg=''; this.resultData=null; this.rfidCode=''; this.restoreFocus(); }
     }
 }
 </script>

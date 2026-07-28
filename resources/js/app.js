@@ -1,6 +1,8 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import ApexCharts from 'apexcharts';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 // jQuery & DataTables
 import jQuery from 'jquery';
@@ -21,6 +23,7 @@ import { Calendar } from '@fullcalendar/core';
 
 window.Alpine = Alpine;
 window.ApexCharts = ApexCharts;
+window.Swal = Swal;
 window.flatpickr = flatpickr;
 window.flatpickrIndonesian = Indonesian;
 window.FullCalendar = Calendar;
