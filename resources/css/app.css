@@ -168,6 +168,10 @@
   --z-index-999999: 999999;
 }
 
+.swal2-container {
+  z-index: 2147483647 !important;
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

@@ -2,21 +2,8 @@
 
 @section('content')
     <div class="space-y-6">
-        <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Manajemen Rombel Siswa" pageSubtitle="Atur penempatan siswa ke dalam rombongan belajar." />
+        <x-common.page-breadcrumb pageTitle="Anggota Kelas" pageSubtitle="Atur keanggotaan siswa dalam kelas." />
 
-        @if(session('success'))
-            <div class="flex p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-                <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                </svg>
-                <span class="sr-only">Success</span>
-                <div>
-                    <span class="font-medium">{{ session('success') }}</span>
-                </div>
-            </div>
-        @endif
-        
         @if(session('error'))
             <div class="flex p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
                 <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -55,15 +42,15 @@
                 </div>
 
                 <div class="w-full sm:w-1/3">
-                    <label for="rombel_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Rombel</label>
+                    <label for="rombel_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Kelas</label>
                     <div x-data="{ isOptionSelected: true }" class="relative z-20 bg-transparent">
                         <select id="rombel_id" name="rombel_id" 
                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 text-gray-800 dark:text-white/90 {{ !$tahun_ajaran_id ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800' : '' }}" 
                             onchange="this.form.submit()" {{ !$tahun_ajaran_id ? 'disabled' : '' }} @change="isOptionSelected = true">
-                            <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Rombel</option>
+                            <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Kelas</option>
                             @foreach($rombels as $rombel)
                                 <option value="{{ $rombel->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $rombel_id == $rombel->id ? 'selected' : '' }}>
-                                    {{ $rombel->select_label }}
+                                    {{ $rombel->kelas_label }}
                                 </option>
                             @endforeach
                         </select>
@@ -84,7 +71,7 @@
                 <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 dark:border-gray-800">
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                            Anggota Rombel: {{ $rombels->where('id', $rombel_id)->first()->nama ?? '' }}
+                            Anggota Kelas: {{ $rombels->where('id', $rombel_id)->first()?->kelas_label ?? '' }}
                         </h3>
                         <p class="text-sm text-gray-500 mt-1">Anggota aktif: {{ $rombel_siswas->whereNull('tanggal_keluar')->count() }} siswa. Histori tetap ditampilkan.</p>
                     </div>
@@ -93,7 +80,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
-                            Tambah Siswa ke Rombel
+                            Tambah Anggota Kelas
                         </a>
                     </div>
                 </div>
@@ -189,8 +176,8 @@
                     <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
-                    <p class="text-base font-medium text-gray-900 dark:text-white">Pilih Rombel</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Silakan pilih rombel pada dropdown di atas untuk melihat atau mengelola anggotanya.</p>
+                    <p class="text-base font-medium text-gray-900 dark:text-white">Pilih Kelas</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Silakan pilih kelas pada dropdown di atas untuk melihat atau mengelola anggotanya.</p>
                 </div>
             @else
                 <div class="flex flex-col items-center justify-center p-12 bg-white border border-gray-200 border-dashed rounded-2xl dark:bg-white/[0.03] dark:border-gray-800">

@@ -2,38 +2,17 @@
 
 @section('content')
     <div class="space-y-6">
-        <!-- Breadcrumb -->
-        <x-common.page-breadcrumb pageTitle="Data Rombel" pageSubtitle="Pengelolaan Rombongan Belajar (Kelas) dan pengaturan Wali Kelas per Tahun Ajaran." />
-
-        @if(session('success'))
-            <div class="flex p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-                <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                </svg>
-                <span class="sr-only">Success</span>
-                <div>
-                    <span class="font-medium">{{ session('success') }}</span>
-                </div>
-            </div>
-        @endif
+        <x-common.page-breadcrumb pageTitle="Data Kelas" pageSubtitle="Pengelolaan Data Kelas (Rombongan Belajar) dan pengaturan Wali Kelas per Tahun Ajaran.">
+            <x-slot:action>
+                <a href="{{ route('master.rombel.create') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah Kelas
+                </a>
+            </x-slot:action>
+        </x-common.page-breadcrumb>
 
         <!-- Table Container -->
         <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
-            <!-- Header -->
-            <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 dark:border-gray-800">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                    Daftar Rombel
-                </h3>
-                <div class="flex gap-3">
-                    <a href="{{ route('master.rombel.create') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Tambah Rombel
-                    </a>
-                </div>
-            </div>
-
             <!-- Table -->
             <div class="overflow-x-auto p-5">
                 <table class="w-full text-left border-collapse data-table">
@@ -42,7 +21,7 @@
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 w-16">#</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Tahun Ajaran</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Tingkat</th>
-                            <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Nama Rombel</th>
+                            <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Nama Kelas</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Wali Kelas</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 text-right w-24" data-orderable="false">Aksi</th>
                         </tr>
@@ -62,10 +41,10 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4 text-sm text-gray-900 dark:text-gray-300">
-                                    Kelas {{ $rombel->tingkat }}
+                                    Tingkat {{ $rombel->tingkat }}
                                 </td>
                                 <td class="px-5 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $rombel->nama }}
+                                    {{ $rombel->kelas_label }}
                                 </td>
                                 <td class="px-5 py-4 text-sm text-gray-900 dark:text-gray-300">
                                     {{ optional($rombel->waliGuru)->nama_lengkap }}
@@ -77,7 +56,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
                                         </a>
-                                        <form action="{{ route('master.rombel.destroy', $rombel->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data rombel ini?');">
+                                        <form action="{{ route('master.rombel.destroy', $rombel->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data kelas ini?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Hapus">

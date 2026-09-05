@@ -14,19 +14,19 @@ class KartuRfidController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        
+
         $query = KartuRfid::with('siswa')->latest();
-        
+
         if ($search) {
             $query->where('kode_uid', 'like', "%{$search}%")
-                  ->orWhereHas('siswa', function($q) use ($search) {
-                      $q->where('nama_lengkap', 'like', "%{$search}%")
+                ->orWhereHas('siswa', function ($q) use ($search) {
+                    $q->where('nama_lengkap', 'like', "%{$search}%")
                         ->orWhere('nisn', 'like', "%{$search}%");
-                  });
+                });
         }
-        
+
         $kartu_rfids = $query->get();
-        
+
         return view('pages.kartu-rfid.index', compact('kartu_rfids', 'search'), ['title' => 'Data Kartu RFID']);
     }
 
@@ -36,6 +36,7 @@ class KartuRfidController extends Controller
     public function create()
     {
         $siswas = Siswa::doesntHave('kartuRfid')->orderBy('nama_lengkap')->get();
+
         return view('pages.kartu-rfid.create', compact('siswas'), ['title' => 'Tambah Kartu RFID']);
     }
 
@@ -51,7 +52,7 @@ class KartuRfidController extends Controller
             'kode_uid' => ['required', 'string', 'min:4', 'max:32', 'regex:/^[A-Z0-9:-]+$/', 'unique:kartu_rfid,kode_uid'],
             'status' => 'required|in:aktif,nonaktif',
         ]);
-        
+
         $validated['diterbitkan_pada'] = now();
 
         KartuRfid::create($validated);
@@ -65,6 +66,7 @@ class KartuRfidController extends Controller
     public function show(string $id)
     {
         $kartu = KartuRfid::with('siswa')->findOrFail($id);
+
         return view('pages.kartu-rfid.show', compact('kartu'), ['title' => 'Detail Kartu RFID']);
     }
 
@@ -74,6 +76,7 @@ class KartuRfidController extends Controller
     public function edit(string $id)
     {
         $kartu = KartuRfid::with('siswa')->findOrFail($id);
+
         return view('pages.kartu-rfid.edit', compact('kartu'), ['title' => 'Edit Kartu RFID']);
     }
 
@@ -86,7 +89,7 @@ class KartuRfidController extends Controller
         $request->merge(['kode_uid' => strtoupper($request->input('kode_uid', ''))]);
 
         $validated = $request->validate([
-            'kode_uid' => 'required|string|unique:kartu_rfid,kode_uid,' . $kartu->id,
+            'kode_uid' => 'required|string|unique:kartu_rfid,kode_uid,'.$kartu->id,
             'status' => 'required|in:aktif,nonaktif',
         ]);
 

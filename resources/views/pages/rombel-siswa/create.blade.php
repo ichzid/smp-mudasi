@@ -4,17 +4,14 @@
     <div class="space-y-6">
         <!-- Breadcrumb -->
         <x-common.page-breadcrumb 
-            pageTitle="Tambah Anggota Rombel" 
-            pageSubtitle="Pilih siswa untuk ditambahkan ke rombongan belajar ini." 
-            :breadcrumbs="[
-                ['label' => 'Manajemen Rombel Siswa', 'url' => route('rombel-siswa.index', ['tahun_ajaran_id' => $rombel->tahun_ajaran_id, 'rombel_id' => $rombel->id])]
-            ]"
+            pageTitle="Tambah Anggota Kelas"
+            pageSubtitle="Pilih siswa yang akan ditambahkan sebagai anggota kelas."
         />
 
         <div class="mb-6 bg-brand-50 dark:bg-brand-900/20 p-5 rounded-2xl border border-brand-100 dark:border-brand-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
                 <p class="text-sm font-medium text-brand-600 dark:text-brand-400 mb-1">Menambahkan siswa ke:</p>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Kelas {{ $rombel->label }}</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $rombel->kelas_label }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Tahun Ajaran: {{ $rombel->tahunAjaran->nama }} - Semester {{ $rombel->tahunAjaran->semester == 1 ? 'Ganjil' : 'Genap' }}</p>
             </div>
             <a href="{{ route('rombel-siswa.index', ['tahun_ajaran_id' => $rombel->tahun_ajaran_id, 'rombel_id' => $rombel->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-all">
@@ -115,7 +112,7 @@
                         <span id="selectedCount" class="font-bold text-brand-600 dark:text-brand-400">0</span> siswa dipilih
                     </div>
                     <button type="submit" id="btnSubmit" disabled class="px-6 py-2.5 text-sm font-medium text-white bg-brand-500 border border-transparent rounded-lg shadow-sm hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                        Simpan Anggota Rombel
+                        Simpan Anggota Kelas
                     </button>
                 </div>
             </form>

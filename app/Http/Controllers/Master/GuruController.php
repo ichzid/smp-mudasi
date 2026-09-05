@@ -15,6 +15,7 @@ class GuruController extends Controller
     public function index()
     {
         $gurus = Guru::orderBy('nama_lengkap')->get();
+
         return view('pages.master.guru.index', compact('gurus'), ['title' => 'Data Guru']);
     }
 
@@ -59,6 +60,7 @@ class GuruController extends Controller
     public function show(string $id)
     {
         $guru = Guru::findOrFail($id);
+
         return view('pages.master.guru.show', compact('guru'), ['title' => 'Detail Guru']);
     }
 
@@ -68,6 +70,7 @@ class GuruController extends Controller
     public function edit(string $id)
     {
         $guru = Guru::findOrFail($id);
+
         return view('pages.master.guru.edit', compact('guru'), ['title' => 'Edit Data Guru']);
     }
 
@@ -79,7 +82,7 @@ class GuruController extends Controller
         $guru = Guru::findOrFail($id);
 
         $validated = $request->validate([
-            'nip' => 'nullable|string|unique:guru,nip,' . $guru->id,
+            'nip' => 'nullable|string|unique:guru,nip,'.$guru->id,
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
             'no_hp' => 'nullable|string',
@@ -109,12 +112,12 @@ class GuruController extends Controller
     public function destroy(string $id)
     {
         $guru = Guru::findOrFail($id);
-        
+
         // Cek jika guru menjadi wali kelas (opsional tapi disarankan)
         if ($guru->rombel()->exists()) {
             return redirect()->route('master.guru.index')->with('error', 'Guru tidak dapat dihapus karena sedang menjadi Wali Kelas.');
         }
-        
+
         if ($guru->foto && Storage::disk('public')->exists($guru->foto)) {
             Storage::disk('public')->delete($guru->foto);
         }

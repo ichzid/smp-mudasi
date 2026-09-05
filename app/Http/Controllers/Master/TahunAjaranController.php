@@ -16,6 +16,7 @@ class TahunAjaranController extends Controller
     public function index()
     {
         $tahunAjarans = TahunAjaran::orderBy('nama', 'desc')->orderBy('semester', 'desc')->get();
+
         return view('pages.master.tahun-ajaran.index', compact('tahunAjarans'), ['title' => 'Data Tahun Ajaran']);
     }
 
@@ -57,7 +58,8 @@ class TahunAjaranController extends Controller
             return redirect()->route('master.tahun-ajaran.index')->with('success', 'Tahun ajaran berhasil ditambahkan.');
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+
+            return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage())->withInput();
         }
     }
 
@@ -75,6 +77,7 @@ class TahunAjaranController extends Controller
     public function edit(string $id)
     {
         $tahunAjaran = TahunAjaran::findOrFail($id);
+
         return view('pages.master.tahun-ajaran.edit', compact('tahunAjaran'), ['title' => 'Edit Tahun Ajaran']);
     }
 
@@ -111,7 +114,8 @@ class TahunAjaranController extends Controller
             return redirect()->route('master.tahun-ajaran.index')->with('success', 'Tahun ajaran berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+
+            return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage())->withInput();
         }
     }
 
@@ -121,12 +125,13 @@ class TahunAjaranController extends Controller
     public function destroy(string $id)
     {
         $tahunAjaran = TahunAjaran::findOrFail($id);
-        
+
         if ($tahunAjaran->is_aktif) {
             return redirect()->route('master.tahun-ajaran.index')->with('error', 'Tidak dapat menghapus tahun ajaran yang sedang aktif.');
         }
 
         $tahunAjaran->delete();
+
         return redirect()->route('master.tahun-ajaran.index')->with('success', 'Tahun ajaran berhasil dihapus.');
     }
 }

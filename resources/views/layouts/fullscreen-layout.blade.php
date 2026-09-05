@@ -103,10 +103,6 @@ const checkMobile = () => {
 };
 window.addEventListener('resize', checkMobile);">
 
-    {{-- preloader --}}
-    <x-common.preloader/>
-    {{-- preloader end --}}
-
     @yield('content')
 
 </body>

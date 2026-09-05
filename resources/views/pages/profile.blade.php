@@ -32,12 +32,6 @@
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Perbarui nama, alamat email, atau kata sandi akun Anda.</p>
             </div>
 
-            @if (session('success'))
-                <div class="mb-5 rounded-lg border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400">
-                    {{ session('success') }}
-                </div>
-            @endif
-
             @if ($errors->any())
                 <div class="mb-5 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400">
                     {{ $errors->first() }}

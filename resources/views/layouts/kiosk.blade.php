@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Kiosk Presensi' }} | SMP Muhammadiyah Danau Sijabut</title>
+    <title>{{ $title ?? 'Absen Kartu RFID' }} | SMP Muhammadiyah Danau Sijabut</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo/smp_mudasi.png') }}">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])

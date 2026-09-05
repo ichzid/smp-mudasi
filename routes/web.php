@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\JadwalPresensiController;
 use App\Http\Controllers\KartuRfidController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\Master\GuruController;
@@ -27,14 +28,21 @@ Route::middleware('auth')->group(function () {
             Route::resource('siswa', SiswaController::class);
             Route::resource('tahun-ajaran', TahunAjaranController::class);
             Route::resource('guru', GuruController::class);
-            Route::resource('rombel', RombelController::class);
+            Route::resource('kelas', RombelController::class)
+                ->parameters(['kelas' => 'rombel'])
+                ->names('rombel');
         });
 
         Route::resource('kartu-rfid', KartuRfidController::class)->except(['show']);
-        Route::resource('rombel-siswa', RombelSiswaController::class)->except(['show', 'edit', 'update']);
+        Route::resource('anggota-kelas', RombelSiswaController::class)
+            ->parameters(['anggota-kelas' => 'rombel_siswa'])
+            ->names('rombel-siswa')
+            ->except(['show', 'edit', 'update']);
     });
 
     Route::middleware('role:admin,tu,wali_kelas')->group(function () {
+        Route::get('pengaturan-presensi', [JadwalPresensiController::class, 'index'])->name('pengaturan-presensi.index');
+        Route::put('pengaturan-presensi/{jadwalPresensi}', [JadwalPresensiController::class, 'update'])->name('pengaturan-presensi.update');
         Route::resource('presensi', PresensiController::class)->only(['index', 'store']);
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/csv', [LaporanController::class, 'csv'])->name('laporan.csv');

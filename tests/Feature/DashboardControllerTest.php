@@ -40,6 +40,7 @@ test('dashboard hanya menghitung siswa aktif dengan keanggotaan rombel yang vali
     $sudahKeluar = $buatSiswa('004');
     $tidakAktif = $buatSiswa('005', 'lulus');
     $tahunLalu = $buatSiswa('006');
+    $rombelTidakCocok = $buatSiswa('007');
 
     DB::table('rombel_siswa')->insert([
         ['rombel_id' => $rombelAktif, 'siswa_id' => $hadir, 'tanggal_masuk' => '2026-07-01', 'tanggal_keluar' => null],
@@ -48,6 +49,7 @@ test('dashboard hanya menghitung siswa aktif dengan keanggotaan rombel yang vali
         ['rombel_id' => $rombelAktif, 'siswa_id' => $sudahKeluar, 'tanggal_masuk' => '2026-07-01', 'tanggal_keluar' => '2026-07-17'],
         ['rombel_id' => $rombelAktif, 'siswa_id' => $tidakAktif, 'tanggal_masuk' => '2026-07-01', 'tanggal_keluar' => null],
         ['rombel_id' => $rombelLama, 'siswa_id' => $tahunLalu, 'tanggal_masuk' => '2025-07-01', 'tanggal_keluar' => null],
+        ['rombel_id' => $rombelAktif, 'siswa_id' => $rombelTidakCocok, 'tanggal_masuk' => '2026-07-01', 'tanggal_keluar' => null],
     ]);
 
     foreach ([
@@ -67,16 +69,30 @@ test('dashboard hanya menghitung siswa aktif dengan keanggotaan rombel yang vali
         ]);
     }
 
+    DB::table('presensi')->insert([
+        'siswa_id' => $rombelTidakCocok,
+        'rombel_id' => $rombelLama,
+        'tanggal' => '2026-07-18',
+        'waktu_masuk' => '07:00:00',
+        'waktu_pulang' => '10:00:00',
+        'status' => 'hadir',
+        'status_pulang' => 'pulang_cepat',
+        'metode' => 'manual',
+    ]);
+
     $this->get(route('dashboard'))
         ->assertOk()
-        ->assertViewHas('totalSiswa', 2)
+        ->assertViewHas('totalSiswa', 3)
         ->assertViewHas('totalRombel', 1)
         ->assertViewHas('hadir', 1)
         ->assertViewHas('terlambat', 1)
         ->assertViewHas('izin', 0)
         ->assertViewHas('sakit', 0)
         ->assertViewHas('alpa', 0)
-        ->assertViewHas('persentaseHadir', 100.0);
+        ->assertViewHas('persentaseHadir', 67.0)
+        ->assertViewHas('sudahMasuk', 0)
+        ->assertViewHas('sudahPulang', 0)
+        ->assertViewHas('pulangCepat', 0);
 });
 
 test('dashboard aman ketika tidak ada tahun ajaran aktif', function () {
@@ -90,4 +106,13 @@ test('dashboard aman ketika tidak ada tahun ajaran aktif', function () {
         ->assertViewHas('sakit', 0)
         ->assertViewHas('alpa', 0)
         ->assertViewHas('persentaseHadir', 0);
+});
+
+test('dashboard menentukan hari ini secara eksplisit dalam WIB', function () {
+    config(['app.timezone' => 'UTC']);
+    Carbon::setTestNow(Carbon::parse('2026-07-17 17:30:00', 'UTC'));
+
+    $this->get(route('dashboard'))
+        ->assertOk()
+        ->assertViewHas('today', '2026-07-18');
 });

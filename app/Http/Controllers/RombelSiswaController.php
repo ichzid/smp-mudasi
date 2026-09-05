@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RombelSiswa;
 use App\Models\Rombel;
+use App\Models\RombelSiswa;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
@@ -21,7 +21,7 @@ class RombelSiswaController extends Controller
         $tahun_ajaran_id = $request->input('tahun_ajaran_id')
             ?: optional($tahun_ajarans->firstWhere('is_aktif', true))->id;
         $rombel_id = $request->input('rombel_id');
-        
+
         $rombels = collect();
         $rombel_siswas = collect();
 
@@ -44,7 +44,7 @@ class RombelSiswaController extends Controller
                 ->get();
         }
 
-        return view('pages.rombel-siswa.index', compact('tahun_ajarans', 'rombels', 'rombel_siswas', 'tahun_ajaran_id', 'rombel_id'), ['title' => 'Manajemen Rombel Siswa']);
+        return view('pages.rombel-siswa.index', compact('tahun_ajarans', 'rombels', 'rombel_siswas', 'tahun_ajaran_id', 'rombel_id'), ['title' => 'Anggota Kelas']);
     }
 
     /**
@@ -54,7 +54,7 @@ class RombelSiswaController extends Controller
     {
         $rombel_id = $request->input('rombel_id');
         $rombel = Rombel::with('tahunAjaran')->findOrFail($rombel_id);
-        
+
         $siswaAktifDiTahunAjaran = RombelSiswa::whereNull('tanggal_keluar')
             ->whereHas('rombel', function ($query) use ($rombel) {
                 $query->where('tahun_ajaran_id', $rombel->tahun_ajaran_id);
@@ -66,7 +66,7 @@ class RombelSiswaController extends Controller
             ->orderBy('nama_lengkap')
             ->get();
 
-        return view('pages.rombel-siswa.create', compact('rombel', 'siswas'), ['title' => 'Tambah Anggota Rombel']);
+        return view('pages.rombel-siswa.create', compact('rombel', 'siswas'), ['title' => 'Tambah Anggota Kelas']);
     }
 
     /**
@@ -89,7 +89,7 @@ class RombelSiswaController extends Controller
 
             foreach ($siswaIds as $siswaId) {
                 $siswa = $siswas->get($siswaId);
-                if (!$siswa || $siswa->status !== 'aktif') {
+                if (! $siswa || $siswa->status !== 'aktif') {
                     throw ValidationException::withMessages([
                         'siswa_id' => 'Hanya siswa berstatus aktif yang dapat ditambahkan.',
                     ]);
@@ -121,7 +121,7 @@ class RombelSiswaController extends Controller
         });
 
         return redirect()->route('rombel-siswa.index', ['tahun_ajaran_id' => $rombel->tahun_ajaran_id, 'rombel_id' => $rombel->id])
-            ->with('success', 'Berhasil menambahkan siswa ke rombel.');
+            ->with('success', 'Siswa berhasil ditambahkan sebagai anggota kelas.');
     }
 
     /**

@@ -4,19 +4,16 @@
     <div class="space-y-6">
         <!-- Breadcrumb -->
         <x-common.page-breadcrumb 
-            pageTitle="Detail Data Rombel" 
-            pageSubtitle="Informasi lengkap detail rombongan belajar." 
-            :breadcrumbs="[
-                ['label' => 'Data Rombel', 'url' => route('master.rombel.index')]
-            ]"
+            pageTitle="Detail Data Kelas"
+            pageSubtitle="Informasi lengkap data kelas."
         />
 
         <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
             <div class="p-6 sm:p-8">
                 <div class="flex justify-between items-start mb-6">
                     <div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $rombel->nama_rombel }}</h3>
-                        <p class="text-brand-500 font-medium mt-1">Kelas {{ $rombel->tingkat }}</p>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $rombel->kelas_label }}</h3>
+                        <p class="text-brand-500 font-medium mt-1">Tingkat {{ $rombel->tingkat }}</p>
                     </div>
                     <a href="{{ route('master.rombel.edit', $rombel->id) }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +65,7 @@
                 </div>
                 
                 <div class="mt-8">
-                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Statistik Rombel</h4>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Statistik Kelas</h4>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <!-- Placeholder untuk data statistik siswa, bisa diisi nanti saat relasi siswa rombel dibuat -->
                         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-xl text-center shadow-sm">

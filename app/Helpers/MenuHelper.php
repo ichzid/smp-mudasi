@@ -9,7 +9,7 @@ class MenuHelper
         return [
             [
                 'icon' => 'dashboard',
-                'name' => 'Ringkasan',
+                'name' => 'Dashboard',
                 'path' => '/',
             ],
             [
@@ -19,20 +19,20 @@ class MenuHelper
                     ['name' => 'Tahun Ajaran', 'path' => '/master/tahun-ajaran', 'pro' => false],
                     ['name' => 'Data Guru', 'path' => '/master/guru', 'pro' => false],
                     ['name' => 'Data Siswa', 'path' => '/master/siswa', 'pro' => false],
-                    ['name' => 'Data Rombel', 'path' => '/master/rombel', 'pro' => false],
+                    ['name' => 'Data Kelas', 'path' => '/master/kelas', 'pro' => false],
                 ],
             ],
             [
                 'icon' => 'members',
-                'name' => 'Anggota Rombel',
-                'path' => '/rombel-siswa',
+                'name' => 'Anggota Kelas',
+                'path' => '/anggota-kelas',
             ],
             [
                 'icon' => 'attendance',
                 'name' => 'Presensi',
                 'subItems' => [
                     ['name' => 'Kartu RFID', 'path' => '/kartu-rfid', 'pro' => false],
-                    ['name' => 'Kiosk Presensi', 'path' => '/presensi/kiosk', 'pro' => false],
+                    ['name' => 'Absen Kartu', 'path' => '/presensi/kiosk', 'pro' => false],
                     ['name' => 'Presensi Manual', 'path' => '/presensi', 'pro' => false],
                     ['name' => 'Laporan Presensi', 'path' => '/laporan', 'pro' => false],
                 ],
@@ -65,57 +65,17 @@ class MenuHelper
                 'items' => [
                     [
                         'icon' => 'dashboard',
-                        'name' => 'Ringkasan',
+                        'name' => 'Dashboard',
                         'path' => '/',
                     ],
                 ],
             ],
             [
-                'title' => 'Data Master',
+                'title' => 'Operasional Presensi',
                 'items' => [
-                    [
-                        'icon' => 'calendar',
-                        'name' => 'Tahun Ajaran',
-                        'path' => '/master/tahun-ajaran',
-                    ],
-                    [
-                        'icon' => 'teacher',
-                        'name' => 'Data Guru',
-                        'path' => '/master/guru',
-                    ],
-                    [
-                        'icon' => 'students',
-                        'name' => 'Data Siswa',
-                        'path' => '/master/siswa',
-                    ],
-                    [
-                        'icon' => 'classroom',
-                        'name' => 'Data Rombel',
-                        'path' => '/master/rombel',
-                    ],
-                ],
-            ],
-            [
-                'title' => 'Akademik',
-                'items' => [
-                    [
-                        'icon' => 'members',
-                        'name' => 'Anggota Rombel',
-                        'path' => '/rombel-siswa',
-                    ],
-                ],
-            ],
-            [
-                'title' => 'Presensi',
-                'items' => [
-                    [
-                        'icon' => 'rfid',
-                        'name' => 'Kartu RFID',
-                        'path' => '/kartu-rfid',
-                    ],
                     [
                         'icon' => 'kiosk',
-                        'name' => 'Kiosk Presensi',
+                        'name' => 'Absen Kartu',
                         'path' => '/presensi/kiosk',
                     ],
                     [
@@ -124,6 +84,27 @@ class MenuHelper
                         'path' => '/presensi',
                         'exact' => true,
                     ],
+                ],
+            ],
+            [
+                'title' => 'Data Akademik',
+                'items' => [
+                    [
+                        'icon' => 'classroom',
+                        'name' => 'Master Data',
+                        'subItems' => [
+                            ['name' => 'Tahun Ajaran', 'path' => '/master/tahun-ajaran'],
+                            ['name' => 'Data Guru', 'path' => '/master/guru'],
+                            ['name' => 'Data Siswa', 'path' => '/master/siswa'],
+                            ['name' => 'Data Kelas', 'path' => '/master/kelas'],
+                            ['name' => 'Anggota Kelas', 'path' => '/anggota-kelas'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Laporan',
+                'items' => [
                     [
                         'icon' => 'report',
                         'name' => 'Laporan Presensi',
@@ -132,7 +113,22 @@ class MenuHelper
                 ],
             ],
             [
-                'title' => 'Sistem',
+                'title' => 'Pengaturan',
+                'items' => [
+                    [
+                        'icon' => 'rfid',
+                        'name' => 'Kartu RFID',
+                        'path' => '/kartu-rfid',
+                    ],
+                    [
+                        'icon' => 'calendar',
+                        'name' => 'Jadwal Presensi',
+                        'path' => '/pengaturan-presensi',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Akun',
                 'items' => self::getOthersItems(),
             ],
         ];

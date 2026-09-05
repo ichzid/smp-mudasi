@@ -408,15 +408,11 @@
     };
     window.addEventListener('resize', checkMobile);">
 
-    {{-- preloader --}}
-    <x-common.preloader/>
-    {{-- preloader end --}}
-
     <div class="min-h-screen xl:flex">
         @include('layouts.backdrop')
         @include('layouts.sidebar')
 
-        <div class="flex-1 transition-all duration-300 ease-in-out"
+        <div class="ml-0 flex-1 xl:ml-[290px]"
             :class="{
                 'xl:ml-[290px]': $store.sidebar.isExpanded || $store.sidebar.isHovered,
                 'xl:ml-[90px]': !$store.sidebar.isExpanded && !$store.sidebar.isHovered,
@@ -433,6 +429,23 @@
     </div>
 
     @stack('scripts')
+
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: {{ Illuminate\Support\Js::from(session('success')) }},
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: '#465fff',
+                    backdrop: true,
+                    timer: 3500,
+                    timerProgressBar: true
+                });
+            });
+        </script>
+    @endif
 </body>
 
 </html>

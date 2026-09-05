@@ -1,4 +1,4 @@
-@extends('layouts.kiosk', ['title' => 'Kiosk Presensi RFID'])
+@extends('layouts.kiosk', ['title' => 'Absen Kartu RFID'])
 
 @section('content')
 <style>
@@ -164,7 +164,7 @@
                     <template x-if="scan.foto_url"><img class="avatar" :src="scan.foto_url" :alt="'Foto ' + scan.nama"></template>
                     <template x-if="!scan.foto_url"><span class="avatar" aria-hidden="true"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-8 9a8 8 0 0116 0H4z"/></svg></span></template>
                     <div><div class="li-name" x-text="scan.nama"></div><div class="li-meta" x-text="scan.kelas + ' · ' + scan.waktu"></div></div>
-                    <span class="li-status" :class="scan.status" x-text="scan.status === 'hadir' ? 'HADIR' : 'TERLAMBAT'"></span>
+
                 </li></template>
             </ul>
         </aside>
@@ -206,7 +206,7 @@ function kioskData() {
             try {
                 const response=await fetch('{{ route("presensi.scan") }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json'},body:JSON.stringify({kode_uid:code})});
                 const data=await response.json().catch(() => ({}));
-                if (response.ok && data.success) await this.showSuccess(data.data); else await this.showError(data.message || 'Kartu tidak dikenali. Silakan coba kembali.');
+                if (data.action && data.action !== 'error') await this.showResult(data); else await this.showError(data.message || 'Kartu tidak dikenali. Silakan coba kembali.');
             } catch (_) { await this.showError('Server tidak dapat dihubungi. Periksa koneksi jaringan.'); }
             finally { this.resetScanner(); }
         },
@@ -220,15 +220,21 @@ function kioskData() {
             const status=document.createElement('div'); status.className='kiosk-result-status'; status.textContent=data.pesan || (data.status === 'terlambat' ? 'Presensi terlambat tercatat' : 'Presensi berhasil tercatat');
             details.append(name,meta,status); card.append(photo,details); return card;
         },
-        async showSuccess(data) {
-            this.scannerState='success'; this.feedbackMsg=data.pesan; this.resultData=data; this.modalActive=true; this.addToRecentLog(data);
-            await Swal.fire({icon:'success',title:'Presensi Tercatat',html:this.buildResultContent(data),showConfirmButton:false,timer:5500,timerProgressBar:true,allowOutsideClick:false,allowEscapeKey:true,customClass:{popup:'kiosk-result-popup'}});
+        async showResult(response) {
+            const data=response.data; const action=response.action;
+            this.scannerState=action==='terlalu_awal'?'error':'success'; this.feedbackMsg=response.message; this.resultData=data; this.modalActive=true;
+            if (['masuk','pulang'].includes(action)) this.addToRecentLog({...data,waktu:action==='masuk'?data.waktu_masuk:data.waktu_pulang,status:action});
+            const options={
+                masuk:{icon:'success',title:'Presensi Masuk Berhasil'}, pulang:{icon:'success',title:'Presensi Pulang Berhasil'},
+                terlalu_awal:{icon:'warning',title:'Belum Waktunya Pulang'}, lengkap:{icon:'info',title:'Presensi Hari Ini Sudah Lengkap'}
+            }[action];
+            await Swal.fire({icon:options.icon,title:options.title,html:this.buildResultContent({...data,waktu:data.waktu_pulang||data.waktu_masuk,pesan:response.message}),confirmButtonText:'Tutup',timer:2000,timerProgressBar:true,allowOutsideClick:false,customClass:{popup:'kiosk-result-popup'}});
         },
         async showError(message) {
             this.scannerState='error'; this.feedbackMsg=message; this.resultData=null; this.modalActive=true;
-            await Swal.fire({icon:'error',title:'Presensi Gagal',text:message,confirmButtonText:'Tutup',timer:4000,timerProgressBar:true,allowOutsideClick:false,allowEscapeKey:true,customClass:{popup:'kiosk-result-popup'}});
+            await Swal.fire({icon:'error',title:'Presensi Gagal',text:message,confirmButtonText:'Tutup',timer:2000,timerProgressBar:true,allowOutsideClick:false,allowEscapeKey:true,customClass:{popup:'kiosk-result-popup'}});
         },
-        addToRecentLog(data) { const scan={key:data.nis+'-'+Date.now(),id:data.nis,nama:data.nama,kelas:data.kelas,waktu:data.waktu,status:data.status,foto_url:data.foto_url}; this.recentScans.unshift(scan); this.recentScans=this.recentScans.slice(0,6); },
+        addToRecentLog(data) { const scan={key:data.nis+'-'+Date.now(),id:data.nis,nama:data.nama,kelas:data.kelas,waktu:data.waktu,status:data.status,action:data.action,foto_url:data.foto_url}; this.recentScans.unshift(scan); this.recentScans=this.recentScans.slice(0,6); },
         resetScanner() { this.modalActive=false; this.scannerState='ready'; this.feedbackMsg=''; this.resultData=null; this.rfidCode=''; this.restoreFocus(); }
     }
 }

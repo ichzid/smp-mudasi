@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Presensi;
 use App\Models\Rombel;
+use App\Models\RombelSiswa;
 use App\Models\TahunAjaran;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -12,161 +13,102 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LaporanController extends Controller
 {
-    private const STATUSES = ['hadir', 'terlambat', 'izin', 'sakit', 'alpa'];
-
     public function index(Request $request)
     {
-        $filters = $this->filters($request);
-        $tab = $filters['tab'] ?? 'harian';
-        $tahunAjaran = $this->selectedTahunAjaran($filters['tahun_ajaran_id'] ?? null);
-        $rombels = $tahunAjaran ? $this->accessibleRombels($request, $tahunAjaran->id)->get() : collect();
-        $rombel = $this->selectedRombel($rombels, $filters['rombel_id'] ?? null);
-        $tanggal = ($filters['tanggal'] ?? null) ?: now()->toDateString();
-        $bulan = ($filters['bulan'] ?? null) ?: now()->format('Y-m');
+        $data = $this->data($request, false);
 
-        $rows = $tab === 'bulanan'
-            ? $this->monthlyRows($rombel, $bulan)
-            : $this->dailyRows($rombel, $tanggal);
-
-        return view('pages.laporan.index', [
-            'title' => 'Laporan Presensi',
-            'tab' => $tab,
-            'tahunAjarans' => TahunAjaran::orderByDesc('nama')->orderByDesc('semester')->get(),
-            'tahunAjaran' => $tahunAjaran,
-            'rombels' => $rombels,
-            'rombel' => $rombel,
-            'tanggal' => $tanggal,
-            'bulan' => $bulan,
-            'rows' => $rows,
-            'statuses' => self::STATUSES,
-        ]);
-    }
-
-    public function csv(Request $request): StreamedResponse
-    {
-        $data = $this->reportData($request);
-        $filename = 'laporan-'.$data['tab'].'-'.($data['tab'] === 'harian' ? $data['tanggal'] : $data['bulan']).'.csv';
-
-        return response()->streamDownload(function () use ($data) {
-            $handle = fopen('php://output', 'w');
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, $data['tab'] === 'harian'
-                ? ['Rombel', 'Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpa', 'Total']
-                : ['NIS', 'Nama Siswa', 'Rombel', 'Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpa', 'Total'], ';');
-
-            foreach ($data['rows'] as $row) {
-                $values = $data['tab'] === 'harian'
-                    ? [$row->nama, $row->hadir, $row->terlambat, $row->izin, $row->sakit, $row->alpa, $row->total]
-                    : [$row->nis, $row->nama_lengkap, $row->rombel_nama, $row->hadir, $row->terlambat, $row->izin, $row->sakit, $row->alpa, $row->total];
-                fputcsv($handle, $values, ';');
-            }
-            fclose($handle);
-        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return view('pages.laporan.index', $data + ['title' => 'Laporan Presensi']);
     }
 
     public function print(Request $request)
     {
-        $data = $this->reportData($request);
-
-        return view('pages.laporan.print', $data + ['title' => 'Cetak Laporan Presensi', 'statuses' => self::STATUSES]);
+        return view('pages.laporan.print', $this->data($request, true) + ['title' => 'Cetak Laporan Presensi']);
     }
 
-    private function reportData(Request $request): array
+    public function csv(Request $request): StreamedResponse
     {
-        $filters = $this->filters($request);
-        $tab = $filters['tab'] ?? 'harian';
-        $tahunAjaran = $this->selectedTahunAjaran($filters['tahun_ajaran_id'] ?? null);
-        abort_unless($tahunAjaran, 422, 'Tahun ajaran harus dipilih.');
-        $rombels = $this->accessibleRombels($request, $tahunAjaran->id)->get();
-        $rombel = $this->selectedRombel($rombels, $filters['rombel_id'] ?? null);
-        $tanggal = ($filters['tanggal'] ?? null) ?: now()->toDateString();
-        $bulan = ($filters['bulan'] ?? null) ?: now()->format('Y-m');
+        $d = $this->data($request, true);
 
-        return compact('tab', 'tahunAjaran', 'rombel', 'tanggal', 'bulan') + [
-            'rows' => $tab === 'bulanan' ? $this->monthlyRows($rombel, $bulan) : $this->dailyRows($rombel, $tanggal),
-        ];
+        return response()->streamDownload(function () use ($d) {
+            $h = fopen('php://output', 'w');
+            fwrite($h, "\xEF\xBB\xBF");
+            $headers = $d['tab'] === 'harian' ? ['NIS', 'Nama', 'Status Masuk', 'Waktu Masuk', 'Waktu Pulang', 'Status Pulang', 'Durasi', 'Alasan Pulang Cepat'] : ['NIS', 'Nama', 'Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpa', 'Sudah Pulang', 'Belum Pulang', 'Pulang Cepat'];
+            fputcsv($h, $headers, ';');
+            foreach ($d['rows'] as $r) {
+                fputcsv($h, $d['tab'] === 'harian' ? [$r->siswa->nis, $r->siswa->nama_lengkap, $r->status, $r->waktu_masuk, $r->waktu_pulang, $r->status_pulang, $r->durasi_sekolah, $r->alasan_pulang_cepat] : [$r->nis, $r->nama_lengkap, $r->hadir, $r->terlambat, $r->izin, $r->sakit, $r->alpa, $r->sudah_pulang, $r->belum_pulang, $r->pulang_cepat], ';');
+            }fclose($h);
+        }, 'laporan-'.$d['tab'].'.csv', ['Content-Type' => 'text/csv']);
     }
 
-    private function filters(Request $request): array
+    private function data(Request $request, bool $required): array
     {
-        return $request->validate([
-            'tab' => ['nullable', 'in:harian,bulanan'],
-            'tahun_ajaran_id' => ['nullable', 'integer', 'exists:tahun_ajaran,id'],
-            'rombel_id' => ['nullable', 'integer', 'exists:rombel,id'],
-            'tanggal' => ['nullable', 'date_format:Y-m-d'],
-            'bulan' => ['nullable', 'date_format:Y-m'],
-        ]);
+        $f = $request->validate(['tab' => ['nullable', 'in:harian,bulanan'], 'tahun_ajaran_id' => ['nullable', 'exists:tahun_ajaran,id'], 'rombel_id' => ['nullable', 'exists:rombel,id'], 'tanggal' => ['nullable', 'date_format:Y-m-d'], 'bulan' => ['nullable', 'date_format:Y-m'], 'status_pulang' => ['nullable', 'in:sudah_pulang,belum_pulang,pulang_cepat,lengkap']]);
+        $tab = $f['tab'] ?? 'harian';
+        $tahunAjaran = isset($f['tahun_ajaran_id']) ? TahunAjaran::find($f['tahun_ajaran_id']) : TahunAjaran::where('is_aktif', true)->first();
+        $rombels = $tahunAjaran ? $this->accessible($request, $tahunAjaran->id)->get() : collect();
+        $rombel = isset($f['rombel_id']) ? $rombels->firstWhere('id', (int) $f['rombel_id']) : null;
+        if (isset($f['rombel_id'])) {
+            abort_unless($rombel, 403);
+        }if ($required) {
+            abort_unless($tahunAjaran && $rombel, 422);
+        }$tanggal = $f['tanggal'] ?? now('Asia/Jakarta')->toDateString();
+        $bulan = $f['bulan'] ?? now('Asia/Jakarta')->format('Y-m');
+        $status_pulang = $f['status_pulang'] ?? null;
+        $rows = $rombel ? ($tab === 'harian' ? $this->daily($rombel, $tanggal, $status_pulang) : $this->monthly($rombel, $bulan)) : collect();
+
+        return compact('tab', 'tahunAjaran', 'rombels', 'rombel', 'tanggal', 'bulan', 'status_pulang', 'rows') + ['tahunAjarans' => TahunAjaran::orderByDesc('nama')->get()];
     }
 
-    private function selectedTahunAjaran(int|string|null $id): ?TahunAjaran
+    private function daily(Rombel $r, string $tanggal, ?string $filter)
     {
-        return $id ? TahunAjaran::find($id) : TahunAjaran::where('is_aktif', true)->first();
-    }
+        $presensi = Presensi::where('rombel_id', $r->id)->whereDate('tanggal', $tanggal)->get()->keyBy('siswa_id');
 
-    private function accessibleRombels(Request $request, int $tahunAjaranId): Builder
-    {
-        return Rombel::query()
-            ->where('tahun_ajaran_id', $tahunAjaranId)
-            ->when($request->user()->role === 'wali_kelas', fn (Builder $query) =>
-                $query->whereHas('waliGuru', fn (Builder $guru) => $guru->where('user_id', $request->user()->id)))
-            ->orderBy('tingkat')->orderBy('nama');
-    }
+        return RombelSiswa::with('siswa')->where('rombel_id', $r->id)
+            ->whereDate('tanggal_masuk', '<=', $tanggal)
+            ->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhereDate('tanggal_keluar', '>=', $tanggal))
+            ->get()->map(function (RombelSiswa $anggota) use ($presensi, $r, $tanggal) {
+                $item = $presensi->get($anggota->siswa_id) ?? new Presensi([
+                    'siswa_id' => $anggota->siswa_id,
+                    'rombel_id' => $r->id,
+                    'tanggal' => $tanggal,
+                ]);
 
-    private function selectedRombel($rombels, int|string|null $id): ?Rombel
-    {
-        if (!$id) {
-            return null;
-        }
-
-        $rombel = $rombels->firstWhere('id', $id);
-        abort_unless($rombel, 403, 'Rombel tidak dapat diakses pada tahun ajaran yang dipilih.');
-
-        return $rombel;
-    }
-
-    private function dailyRows(?Rombel $rombel, string $tanggal)
-    {
-        $query = Rombel::query()
-            ->select('rombel.id', 'rombel.nama', 'rombel.tingkat')
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'hadir' THEN 1 ELSE 0 END) AS hadir")
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'terlambat' THEN 1 ELSE 0 END) AS terlambat")
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'izin' THEN 1 ELSE 0 END) AS izin")
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'sakit' THEN 1 ELSE 0 END) AS sakit")
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'alpa' THEN 1 ELSE 0 END) AS alpa")
-            ->selectRaw('COUNT(presensi.id) AS total')
-            ->leftJoin('presensi', function ($join) use ($tanggal) {
-                $join->on('presensi.rombel_id', '=', 'rombel.id')->where('presensi.tanggal', '=', $tanggal);
+                return $item->setRelation('siswa', $anggota->siswa);
             })
-            ->where('rombel.id', $rombel?->id ?? 0)
-            ->groupBy('rombel.id', 'rombel.nama', 'rombel.tingkat');
-
-        return $query->get();
+            ->filter(fn (Presensi $item) => match ($filter) {
+                'sudah_pulang' => $item->waktu_pulang !== null,
+                'belum_pulang' => $item->waktu_masuk !== null && $item->waktu_pulang === null,
+                'pulang_cepat' => $item->status_pulang === 'pulang_cepat',
+                'lengkap' => $item->waktu_masuk !== null && $item->waktu_pulang !== null,
+                default => true,
+            })->sortBy('siswa.nama_lengkap')->values();
     }
 
-    private function monthlyRows(?Rombel $rombel, string $bulan)
+    private function monthly(Rombel $r, string $bulan)
     {
-        if (!$rombel) {
-            return collect();
-        }
+        $start = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+        $presensi = Presensi::where('rombel_id', $r->id)->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])->get()->groupBy('siswa_id');
 
-        $start = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth()->toDateString();
-        $end = Carbon::createFromFormat('Y-m', $bulan)->endOfMonth()->toDateString();
+        return RombelSiswa::with('siswa')->where('rombel_id', $r->id)
+            ->whereDate('tanggal_masuk', '<=', $end->toDateString())
+            ->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhereDate('tanggal_keluar', '>=', $start->toDateString()))
+            ->get()->unique('siswa_id')->map(function (RombelSiswa $anggota) use ($presensi) {
+                $records = $presensi->get($anggota->siswa_id, collect());
+                $row = (object) ['id' => $anggota->siswa->id, 'nis' => $anggota->siswa->nis, 'nama_lengkap' => $anggota->siswa->nama_lengkap];
+                foreach (['hadir', 'terlambat', 'izin', 'sakit', 'alpa'] as $status) {
+                    $row->{$status} = $records->where('status', $status)->count();
+                }
+                $row->sudah_pulang = $records->whereNotNull('waktu_pulang')->count();
+                $row->belum_pulang = $records->whereNotNull('waktu_masuk')->whereNull('waktu_pulang')->count();
+                $row->pulang_cepat = $records->where('status_pulang', 'pulang_cepat')->count();
 
-        return Presensi::query()
-            ->join('siswa', 'siswa.id', '=', 'presensi.siswa_id')
-            ->join('rombel', 'rombel.id', '=', 'presensi.rombel_id')
-            ->select('siswa.id', 'siswa.nis', 'siswa.nama_lengkap', 'rombel.nama as rombel_nama')
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'hadir' THEN 1 ELSE 0 END) AS hadir")
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'terlambat' THEN 1 ELSE 0 END) AS terlambat")
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'izin' THEN 1 ELSE 0 END) AS izin")
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'sakit' THEN 1 ELSE 0 END) AS sakit")
-            ->selectRaw("SUM(CASE WHEN presensi.status = 'alpa' THEN 1 ELSE 0 END) AS alpa")
-            ->selectRaw('COUNT(presensi.id) AS total')
-            ->where('presensi.rombel_id', $rombel->id)
-            ->where('rombel.tahun_ajaran_id', $rombel->tahun_ajaran_id)
-            ->whereBetween('presensi.tanggal', [$start, $end])
-            ->groupBy('siswa.id', 'siswa.nis', 'siswa.nama_lengkap', 'rombel.nama')
-            ->orderBy('siswa.nama_lengkap')
-            ->get();
+                return $row;
+            })->sortBy('nama_lengkap')->values();
+    }
+
+    private function accessible(Request $request, int $ta): Builder
+    {
+        return Rombel::where('tahun_ajaran_id', $ta)->when($request->user()->role === 'wali_kelas', fn ($q) => $q->whereHas('waliGuru', fn ($g) => $g->where('user_id', $request->user()->id)))->orderBy('tingkat')->orderBy('nama');
     }
 }

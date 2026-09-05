@@ -15,6 +15,7 @@ class SiswaController extends Controller
     public function index()
     {
         $siswas = Siswa::latest()->get();
+
         return view('pages.master.siswa.index', compact('siswas'), ['title' => 'Data Siswa']);
     }
 
@@ -61,6 +62,7 @@ class SiswaController extends Controller
     public function show(string $id)
     {
         $siswa = Siswa::findOrFail($id);
+
         return view('pages.master.siswa.show', compact('siswa'), ['title' => 'Detail Siswa']);
     }
 
@@ -70,6 +72,7 @@ class SiswaController extends Controller
     public function edit(string $id)
     {
         $siswa = Siswa::findOrFail($id);
+
         return view('pages.master.siswa.edit', compact('siswa'), ['title' => 'Edit Data Siswa']);
     }
 
@@ -81,8 +84,8 @@ class SiswaController extends Controller
         $siswa = Siswa::findOrFail($id);
 
         $validated = $request->validate([
-            'nisn' => 'nullable|string|unique:siswa,nisn,' . $siswa->id,
-            'nis' => 'required|string|unique:siswa,nis,' . $siswa->id,
+            'nisn' => 'nullable|string|unique:siswa,nisn,'.$siswa->id,
+            'nis' => 'required|string|unique:siswa,nis,'.$siswa->id,
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
             'tempat_lahir' => 'nullable|string',
@@ -113,7 +116,7 @@ class SiswaController extends Controller
     public function destroy(string $id)
     {
         $siswa = Siswa::findOrFail($id);
-        
+
         if ($siswa->foto_url && Storage::disk('public')->exists($siswa->foto_url)) {
             Storage::disk('public')->delete($siswa->foto_url);
         }

@@ -17,12 +17,17 @@ class Rombel extends Model
 
     public function getLabelAttribute(): string
     {
-        return $this->nama === $this->tingkat ? $this->nama : $this->tingkat.' '.$this->nama;
+        return 'Kelas '.$this->nama;
+    }
+
+    public function getKelasLabelAttribute(): string
+    {
+        return 'Kelas '.$this->nama;
     }
 
     public function getSelectLabelAttribute(): string
     {
-        return 'Kelas '.$this->tingkat.' - '.$this->nama;
+        return 'Tingkat '.$this->tingkat.' - Kelas '.$this->nama;
     }
 
     public function tahunAjaran()
