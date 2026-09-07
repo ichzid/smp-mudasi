@@ -206,8 +206,18 @@ function kioskData() {
             try {
                 const response=await fetch('{{ route("presensi.scan") }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content,'Accept':'application/json'},body:JSON.stringify({kode_uid:code})});
                 const data=await response.json().catch(() => ({}));
-                if (data.action && data.action !== 'error') await this.showResult(data); else await this.showError(data.message || 'Kartu tidak dikenali. Silakan coba kembali.');
-            } catch (_) { await this.showError('Server tidak dapat dihubungi. Periksa koneksi jaringan.'); }
+                if (data.action && data.action !== 'error') {
+                    await this.showResult(data);
+                } else if (data.action === 'error' && response.status < 500) {
+                    await this.showError(data.message || 'Kartu tidak dikenali. Silakan coba kembali.');
+                } else {
+                    console.error('Kesalahan layanan presensi', {status:response.status, data});
+                    await this.showError('Presensi belum dapat diproses. Silakan coba kembali atau hubungi petugas.');
+                }
+            } catch (error) {
+                console.error('Layanan presensi tidak dapat dihubungi', error);
+                await this.showError('Server tidak dapat dihubungi. Periksa koneksi jaringan.');
+            }
             finally { this.resetScanner(); }
         },
         buildResultContent(data) {

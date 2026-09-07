@@ -18,7 +18,7 @@ it('melindungi seluruh route laporan dengan auth dan role laporan', function () 
 });
 
 it('laporan harian dan bulanan menyertakan anggota tanpa presensi', function () {
-    $admin = User::create(['name' => 'Admin', 'email' => 'laporan@test.id', 'password' => Hash::make('password'), 'role' => 'admin']);
+    $admin = User::create(['name' => 'Admin', 'username' => 'admin_laporan', 'email' => 'laporan@test.id', 'password' => Hash::make(fake()->password(12)), 'role' => 'admin']);
     $ta = DB::table('tahun_ajaran')->insertGetId(['nama' => '2026/2027', 'semester' => 1, 'is_aktif' => true]);
     $rombel = DB::table('rombel')->insertGetId(['nama' => 'A', 'tingkat' => '7', 'tahun_ajaran_id' => $ta]);
     $siswa = DB::table('siswa')->insertGetId(['nis' => '1001', 'nama_lengkap' => 'Anggota Tanpa Presensi', 'jenis_kelamin' => 'L', 'status' => 'aktif']);

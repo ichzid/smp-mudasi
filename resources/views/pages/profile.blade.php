@@ -51,8 +51,15 @@
                     </div>
 
                     <div>
-                        <label for="email" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Alamat Email <span class="text-error-500">*</span></label>
-                        <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" required autocomplete="email"
+                        <label for="username" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Username <span class="text-error-500">*</span></label>
+                        <input id="username" name="username" type="text" value="{{ old('username', $user->username) }}" required maxlength="255" autocomplete="username"
+                            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                        @error('username')<p class="mt-1.5 text-xs text-error-500">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="email" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Email Internal (opsional)</label>
+                        <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" autocomplete="email"
                             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
                         @error('email')<p class="mt-1.5 text-xs text-error-500">{{ $message }}</p>@enderror
                     </div>

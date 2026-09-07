@@ -9,19 +9,37 @@ it('mengarahkan tamu ke login dari route terautentikasi', function () {
     $this->get(route('master.siswa.index'))->assertRedirect(route('login'));
 });
 
-it('dapat login menggunakan email dan password', function () {
+it('dapat login hanya menggunakan username dan password', function () {
+    $password = fake()->password(12);
     $user = User::factory()->create([
-        'email' => 'admin@example.com',
-        'password' => bcrypt('password-rahasia'),
+        'username' => 'admin',
+        'email' => null,
+        'password' => bcrypt($password),
         'role' => 'admin',
     ]);
 
     $this->post(route('login'), [
-        'email' => 'admin@example.com',
-        'password' => 'password-rahasia',
+        'username' => 'admin',
+        'password' => $password,
     ])->assertRedirect('/');
 
     $this->assertAuthenticatedAs($user);
+});
+
+it('tidak dapat login menggunakan email', function () {
+    $password = fake()->password(12);
+    User::factory()->create([
+        'username' => 'admin',
+        'email' => 'admin@example.com',
+        'password' => bcrypt($password),
+    ]);
+
+    $this->post(route('login'), [
+        'email' => 'admin@example.com',
+        'password' => $password,
+    ])->assertSessionHasErrors('username');
+
+    $this->assertGuest();
 });
 
 it('membatasi route master berdasarkan role', function () {

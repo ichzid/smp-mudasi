@@ -13,7 +13,7 @@ uses(RefreshDatabase::class);
 afterEach(fn () => Carbon::setTestNow());
 function userPresensi(string $role): User
 {
-    return User::create(['name' => $role, 'email' => $role.uniqid().'@test.id', 'password' => Hash::make('password'), 'role' => $role]);
+    return User::create(['name' => $role, 'username' => $role.uniqid(), 'email' => $role.uniqid().'@test.id', 'password' => Hash::make(fake()->password(12)), 'role' => $role]);
 }
 function dataPresensi(?User $wali = null): array
 {

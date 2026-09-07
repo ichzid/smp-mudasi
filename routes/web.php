@@ -61,7 +61,8 @@ Route::middleware('auth')->group(function () {
         ]);
 
         $user->name = $validated['name'];
-        $user->email = $validated['email'];
+        $user->username = $validated['username'];
+        $user->email = $validated['email'] ?? null;
 
         if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
