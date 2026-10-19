@@ -51,6 +51,19 @@ it('menutup keanggotaan lama dan mempertahankan histori saat mutasi', function (
     ]);
 });
 
+it('mempertahankan anggota tahunan saat semester aktif berganti dan menolak overlap lintas semester', function () {
+    [$tahun, $rombelA, $rombelB, $siswa] = dataRombelSiswa();
+    RombelSiswa::create(['rombel_id' => $rombelA->id, 'siswa_id' => $siswa->id, 'tanggal_masuk' => '2026-07-01']);
+    $tahun->update(['semester' => 2]);
+
+    $this->get(route('rombel-siswa.index', ['tahun_ajaran_id' => $tahun->id, 'rombel_id' => $rombelA->id]))
+        ->assertOk()->assertSee('Siswa Mutasi');
+    $this->post(route('rombel-siswa.store'), [
+        'rombel_id' => $rombelB->id, 'siswa_id' => [$siswa->id], 'tanggal_masuk' => '2027-01-10',
+    ])->assertSessionHasErrors('siswa_id');
+    expect(RombelSiswa::count())->toBe(1);
+});
+
 it('menolak keanggotaan yang overlap pada tahun ajaran yang sama', function () {
     [, $rombelA, $rombelB, $siswa] = dataRombelSiswa();
     RombelSiswa::create([

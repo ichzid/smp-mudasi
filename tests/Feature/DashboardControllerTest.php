@@ -95,6 +95,21 @@ test('dashboard hanya menghitung siswa aktif dengan keanggotaan rombel yang vali
         ->assertViewHas('pulangCepat', 0);
 });
 
+test('dashboard mengabaikan snapshot lama dan mendahulukan anggota annual setelah semester berubah', function () {
+    Carbon::setTestNow(Carbon::parse('2027-01-18 08:00', 'Asia/Jakarta'));
+    $ta = DB::table('tahun_ajaran')->insertGetId(['nama' => '2026/2027', 'semester' => 2, 'is_aktif' => true]);
+    $annual = DB::table('rombel')->insertGetId(['nama' => 'Annual', 'tingkat' => '7', 'tahun_ajaran_id' => $ta]);
+    $snapshot = DB::table('rombel')->insertGetId(['nama' => 'Lama', 'tingkat' => '7', 'tahun_ajaran_id' => $ta, 'semester' => 1]);
+    $siswa = DB::table('siswa')->insertGetId(['nis' => 'dashboard-semester', 'nama_lengkap' => 'Siswa annual', 'jenis_kelamin' => 'L', 'status' => 'aktif']);
+    DB::table('rombel_siswa')->insert([
+        ['rombel_id' => $annual, 'siswa_id' => $siswa, 'tanggal_masuk' => '2026-07-01'],
+        ['rombel_id' => $snapshot, 'siswa_id' => $siswa, 'tanggal_masuk' => '2026-07-01'],
+    ]);
+    DB::table('presensi')->insert(['siswa_id' => $siswa, 'rombel_id' => $snapshot, 'tanggal' => '2027-01-18', 'status' => 'hadir', 'metode' => 'manual']);
+
+    $this->get(route('dashboard'))->assertOk()->assertViewHas('totalSiswa', 1)->assertViewHas('totalRombel', 1)->assertViewHas('hadir', 0);
+});
+
 test('dashboard aman ketika tidak ada tahun ajaran aktif', function () {
     $this->get(route('dashboard'))
         ->assertOk()

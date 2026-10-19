@@ -15,6 +15,7 @@ class TahunAjaran extends Model
     ];
 
     protected $casts = [
+        'semester' => 'integer',
         'is_aktif' => 'boolean',
     ];
 

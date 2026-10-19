@@ -7,7 +7,6 @@ use App\Models\Presensi;
 use App\Models\RombelSiswa;
 use App\Models\TahunAjaran;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -25,10 +24,23 @@ class DashboardController extends Controller
             });
 
         if ($tahunAjaranAktif) {
-            $anggotaAktif->whereHas(
-                'rombel',
-                fn ($query) => $query->where('tahun_ajaran_id', $tahunAjaranAktif->id)
-            );
+            $tahun = (int) substr($today, 0, 4);
+            $semester = (int) substr($today, 5, 2) >= 7 ? 1 : 2;
+            $nama = $semester === 1 ? $tahun.'/'.($tahun + 1) : ($tahun - 1).'/'.$tahun;
+            $semester = $tahunAjaranAktif->nama === $nama ? $semester : null;
+            $anggotaAktif->whereHas('rombel', fn ($query) => $query->where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                ->where(fn ($query) => $query->whereNull('semester')->when($semester, fn ($query) => $query->orWhere('semester', $semester))))
+                ->whereNotExists(function ($query) use ($today, $tahunAjaranAktif) {
+                    $query->selectRaw('1')->from('rombel as snapshot_rombel')
+                        ->join('rombel_siswa as annual_anggota', 'annual_anggota.siswa_id', '=', 'rombel_siswa.siswa_id')
+                        ->join('rombel as annual_rombel', 'annual_rombel.id', '=', 'annual_anggota.rombel_id')
+                        ->whereColumn('snapshot_rombel.id', 'rombel_siswa.rombel_id')
+                        ->whereNotNull('snapshot_rombel.semester')
+                        ->where('annual_rombel.tahun_ajaran_id', $tahunAjaranAktif->id)
+                        ->whereNull('annual_rombel.semester')
+                        ->whereDate('annual_anggota.tanggal_masuk', '<=', $today)
+                        ->where(fn ($query) => $query->whereNull('annual_anggota.tanggal_keluar')->orWhereDate('annual_anggota.tanggal_keluar', '>=', $today));
+                });
         } else {
             $anggotaAktif->whereRaw('1 = 0');
         }
@@ -39,27 +51,11 @@ class DashboardController extends Controller
         $totalGuru = Guru::count();
         $totalRombel = (clone $rombelIds)->count('rombel_id');
 
-        $statistik = Presensi::query()
-            ->whereDate('tanggal', $today)
-            ->whereExists(function ($query) use ($today, $tahunAjaranAktif) {
-                $query->select(DB::raw(1))
-                    ->from('rombel_siswa')
-                    ->join('siswa', 'siswa.id', '=', 'rombel_siswa.siswa_id')
-                    ->join('rombel', 'rombel.id', '=', 'rombel_siswa.rombel_id')
-                    ->whereColumn('rombel_siswa.siswa_id', 'presensi.siswa_id')
-                    ->whereColumn('rombel_siswa.rombel_id', 'presensi.rombel_id')
-                    ->where('siswa.status', 'aktif')
-                    ->whereDate('rombel_siswa.tanggal_masuk', '<=', $today)
-                    ->where(function ($query) use ($today) {
-                        $query->whereNull('rombel_siswa.tanggal_keluar')
-                            ->orWhereDate('rombel_siswa.tanggal_keluar', '>=', $today);
-                    })
-                    ->when(
-                        $tahunAjaranAktif,
-                        fn ($query) => $query->where('rombel.tahun_ajaran_id', $tahunAjaranAktif->id),
-                        fn ($query) => $query->whereRaw('1 = 0')
-                    );
-            })
+        $presensiHariIni = Presensi::query()->whereDate('tanggal', $today)
+            ->whereExists((clone $anggotaAktif)->selectRaw('1')
+                ->whereColumn('rombel_siswa.siswa_id', 'presensi.siswa_id')
+                ->whereColumn('rombel_siswa.rombel_id', 'presensi.rombel_id')->toBase());
+        $statistik = (clone $presensiHariIni)
             ->selectRaw('status, count(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
@@ -73,27 +69,6 @@ class DashboardController extends Controller
         $totalTercatat = $totalHadir + $izin + $sakit + $alpa;
         $belumTercatat = max(0, $totalSiswa - $totalTercatat);
         $persentaseHadir = $totalSiswa > 0 ? round(($totalHadir / $totalSiswa) * 100) : 0;
-        $presensiHariIni = Presensi::query()
-            ->whereDate('tanggal', $today)
-            ->whereExists(function ($query) use ($today, $tahunAjaranAktif) {
-                $query->select(DB::raw(1))
-                    ->from('rombel_siswa')
-                    ->join('siswa', 'siswa.id', '=', 'rombel_siswa.siswa_id')
-                    ->join('rombel', 'rombel.id', '=', 'rombel_siswa.rombel_id')
-                    ->whereColumn('rombel_siswa.siswa_id', 'presensi.siswa_id')
-                    ->whereColumn('rombel_siswa.rombel_id', 'presensi.rombel_id')
-                    ->where('siswa.status', 'aktif')
-                    ->whereDate('rombel_siswa.tanggal_masuk', '<=', $today)
-                    ->where(function ($query) use ($today) {
-                        $query->whereNull('rombel_siswa.tanggal_keluar')
-                            ->orWhereDate('rombel_siswa.tanggal_keluar', '>=', $today);
-                    })
-                    ->when(
-                        $tahunAjaranAktif,
-                        fn ($query) => $query->where('rombel.tahun_ajaran_id', $tahunAjaranAktif->id),
-                        fn ($query) => $query->whereRaw('1 = 0')
-                    );
-            });
         $sudahMasuk = (clone $presensiHariIni)->whereNotNull('waktu_masuk')->count();
         $sudahPulang = (clone $presensiHariIni)->whereNotNull('waktu_pulang')->count();
         $belumPulang = (clone $presensiHariIni)->whereNotNull('waktu_masuk')->whereNull('waktu_pulang')->count();

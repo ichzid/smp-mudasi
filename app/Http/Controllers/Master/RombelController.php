@@ -7,6 +7,7 @@ use App\Models\Guru;
 use App\Models\Rombel;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class RombelController extends Controller
 {
@@ -15,7 +16,9 @@ class RombelController extends Controller
      */
     public function index(Request $request)
     {
-        $tahun_ajaran_id = $request->input('tahun_ajaran_id');
+        $tahun_ajarans = TahunAjaran::latest()->get();
+        $tahun_ajaran_id = $request->input('tahun_ajaran_id')
+            ?: optional($tahun_ajarans->firstWhere('is_aktif', true))->id;
 
         $query = Rombel::with(['tahunAjaran', 'waliGuru'])->latest();
 
@@ -23,8 +26,7 @@ class RombelController extends Controller
             $query->where('tahun_ajaran_id', $tahun_ajaran_id);
         }
 
-        $rombels = $query->get();
-        $tahun_ajarans = TahunAjaran::latest()->get();
+        $rombels = $tahun_ajaran_id ? $query->get() : collect();
 
         return view('pages.master.rombel.index', compact('rombels', 'tahun_ajarans', 'tahun_ajaran_id'), ['title' => 'Data Kelas']);
     }
@@ -35,9 +37,7 @@ class RombelController extends Controller
     public function create()
     {
         $tahun_ajarans = TahunAjaran::where('is_aktif', true)->latest()->get();
-        if ($tahun_ajarans->isEmpty()) {
-            $tahun_ajarans = TahunAjaran::latest()->get();
-        }
+        abort_if($tahun_ajarans->isEmpty(), 403, 'Tidak ada periode aktif untuk menambah kelas.');
         $gurus = Guru::orderBy('nama_lengkap')->get();
 
         return view('pages.master.rombel.create', compact('tahun_ajarans', 'gurus'), ['title' => 'Tambah Data Kelas']);
@@ -49,7 +49,7 @@ class RombelController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+            'tahun_ajaran_id' => ['required', Rule::exists('tahun_ajaran', 'id')->where('is_aktif', true)],
             'tingkat' => 'required|in:7,8,9',
             'nama' => 'required|string|max:50',
             'wali_guru_id' => [
@@ -57,6 +57,7 @@ class RombelController extends Controller
                 'exists:guru,id',
                 function ($attribute, $value, $fail) use ($request) {
                     $exists = Rombel::where('tahun_ajaran_id', $request->tahun_ajaran_id)
+                        ->whereNull('semester')
                         ->where('wali_guru_id', $value)
                         ->exists();
                     if ($exists) {
@@ -66,7 +67,7 @@ class RombelController extends Controller
             ],
         ]);
 
-        Rombel::create($validated);
+        Rombel::create($validated + ['semester' => null]);
 
         return redirect()->route('master.rombel.index')->with('success', 'Data kelas berhasil ditambahkan.');
     }
@@ -86,8 +87,9 @@ class RombelController extends Controller
      */
     public function edit(string $id)
     {
-        $rombel = Rombel::findOrFail($id);
-        $tahun_ajarans = TahunAjaran::latest()->get();
+        $rombel = Rombel::with('tahunAjaran')->findOrFail($id);
+        abort_unless($rombel->tahunAjaran->is_aktif && $rombel->semester === null, 403, 'Kelas arsip atau snapshot historis tidak dapat diedit.');
+        $tahun_ajarans = TahunAjaran::where('is_aktif', true)->get();
         $gurus = Guru::orderBy('nama_lengkap')->get();
 
         return view('pages.master.rombel.edit', compact('rombel', 'tahun_ajarans', 'gurus'), ['title' => 'Edit Data Kelas']);
@@ -98,10 +100,11 @@ class RombelController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $rombel = Rombel::findOrFail($id);
+        $rombel = Rombel::with('tahunAjaran')->findOrFail($id);
+        abort_unless($rombel->tahunAjaran->is_aktif && $rombel->semester === null, 403, 'Kelas arsip atau snapshot historis tidak dapat diedit.');
 
         $validated = $request->validate([
-            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+            'tahun_ajaran_id' => ['required', Rule::in([$rombel->tahun_ajaran_id])],
             'tingkat' => 'required|in:7,8,9',
             'nama' => 'required|string|max:50',
             'wali_guru_id' => [
@@ -109,6 +112,7 @@ class RombelController extends Controller
                 'exists:guru,id',
                 function ($attribute, $value, $fail) use ($request, $id) {
                     $exists = Rombel::where('tahun_ajaran_id', $request->tahun_ajaran_id)
+                        ->whereNull('semester')
                         ->where('wali_guru_id', $value)
                         ->where('id', '!=', $id)
                         ->exists();
@@ -129,7 +133,9 @@ class RombelController extends Controller
      */
     public function destroy(string $id)
     {
-        $rombel = Rombel::findOrFail($id);
+        $rombel = Rombel::with('tahunAjaran')->findOrFail($id);
+        abort_unless($rombel->tahunAjaran->is_aktif && $rombel->semester === null, 403, 'Kelas arsip atau snapshot historis tidak dapat dihapus.');
+        abort_if($rombel->siswa()->exists(), 403, 'Kelas yang memiliki riwayat anggota tidak dapat dihapus.');
         $rombel->delete();
 
         return redirect()->route('master.rombel.index')->with('success', 'Data kelas berhasil dihapus.');

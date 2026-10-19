@@ -2,6 +2,7 @@
 
 use App\Models\KartuRfid;
 use App\Models\Presensi;
+use App\Models\PresensiGuru;
 use App\Models\User;
 use Carbon\Carbon;
 use Database\Seeders\JadwalPresensiSeeder;
@@ -18,13 +19,20 @@ function userPresensi(string $role): User
 function dataPresensi(?User $wali = null): array
 {
     $ta = DB::table('tahun_ajaran')->insertGetId(['nama' => '2026/2027', 'semester' => 1, 'is_aktif' => true]);
-    $guru = DB::table('guru')->insertGetId(['nip' => uniqid(), 'nama_lengkap' => 'Wali', 'jenis_kelamin' => 'L', 'user_id' => $wali?->id]);
+    $guru = DB::table('guru')->insertGetId(['nomor_indentitas' => uniqid(), 'nama_lengkap' => 'Wali', 'jenis_kelamin' => 'L', 'user_id' => $wali?->id]);
     $rombel = DB::table('rombel')->insertGetId(['nama' => 'A', 'tingkat' => '7', 'tahun_ajaran_id' => $ta, 'wali_guru_id' => $guru]);
     $siswa = DB::table('siswa')->insertGetId(['nis' => uniqid(), 'nama_lengkap' => 'Siswa', 'jenis_kelamin' => 'L', 'status' => 'aktif']);
     DB::table('rombel_siswa')->insert(['rombel_id' => $rombel, 'siswa_id' => $siswa, 'tanggal_masuk' => '2026-07-01']);
     KartuRfid::create(['siswa_id' => $siswa, 'kode_uid' => 'AB12CD34', 'status' => 'aktif', 'diterbitkan_pada' => '2026-07-01']);
 
     return compact('ta', 'rombel', 'siswa');
+}
+function dataGuruPresensi(array $attributes = []): int
+{
+    $guru = DB::table('guru')->insertGetId(array_merge(['nomor_indentitas' => uniqid(), 'nama_lengkap' => 'Ibu Guru', 'jenis_kelamin' => 'P', 'jabatan' => 'Guru Matematika', 'aktif' => true], $attributes));
+    KartuRfid::create(['guru_id' => $guru, 'kode_uid' => 'GURU1234', 'status' => 'aktif', 'diterbitkan_pada' => '2026-07-01']);
+
+    return $guru;
 }
 
 test('admin dapat memperbarui jadwal dan role lain ditolak', function () {
@@ -91,6 +99,109 @@ test('hari tidak aktif menolak scan', function () {
     dataPresensi();
     $this->postJson(route('presensi.scan'), ['kode_uid' => 'AB12CD34'])->assertStatus(422)->assertJsonPath('type', 'error');
 });
+test('scan guru tanpa tahun ajaran dan rombel mencatat masuk terlambat lalu pulang dan lengkap', function () {
+    Carbon::setTestNow(Carbon::parse('2026-07-27 07:16', 'Asia/Jakarta'));
+    $guru = dataGuruPresensi();
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'guru1234'])->assertOk()
+        ->assertJsonPath('action', 'masuk')->assertJsonPath('data.jenis_pemilik', 'guru')
+        ->assertJsonPath('data.nama', 'Ibu Guru')->assertJsonPath('data.jabatan', 'Guru Matematika')
+        ->assertJsonPath('data.status', 'terlambat');
+    $this->assertDatabaseHas('presensi_guru', ['guru_id' => $guru, 'tanggal' => '2026-07-27', 'waktu_masuk' => '07:16:00', 'status' => 'terlambat', 'metode_masuk' => 'rfid']);
+    expect(Presensi::count())->toBe(0);
+
+    Carbon::setTestNow(Carbon::parse('2026-07-27 13:00', 'Asia/Jakarta'));
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'GURU1234'])->assertOk()
+        ->assertJsonPath('action', 'pulang')->assertJsonPath('data.waktu_pulang', '13:00:00');
+    $this->assertDatabaseHas('presensi_guru', ['guru_id' => $guru, 'waktu_pulang' => '13:00:00', 'status_pulang' => 'tepat_waktu', 'metode_pulang' => 'rfid']);
+    Carbon::setTestNow(Carbon::parse('2026-07-27 13:05', 'Asia/Jakarta'));
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'GURU1234'])->assertOk()->assertJsonPath('action', 'lengkap');
+    expect(PresensiGuru::count())->toBe(1)->and(PresensiGuru::first()->waktu_pulang)->toBe('13:00:00')->and(Presensi::count())->toBe(0);
+});
+
+test('scan guru terlalu awal tidak mengubah waktu pulang', function () {
+    Carbon::setTestNow(Carbon::parse('2026-07-27 07:00', 'Asia/Jakarta'));
+    dataGuruPresensi();
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'GURU1234'])->assertOk()->assertJsonPath('data.status', 'hadir');
+    Carbon::setTestNow(Carbon::parse('2026-07-27 12:59', 'Asia/Jakarta'));
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'GURU1234'])->assertStatus(422)->assertJsonPath('action', 'terlalu_awal')->assertJsonPath('data.jenis_pemilik', 'guru');
+    expect(PresensiGuru::first()->waktu_pulang)->toBeNull();
+});
+
+test('kartu guru nonaktif ditolak', function () {
+    Carbon::setTestNow(Carbon::parse('2026-07-27 07:00', 'Asia/Jakarta'));
+    dataGuruPresensi();
+    DB::table('kartu_rfid')->where('kode_uid', 'GURU1234')->update(['status' => 'nonaktif']);
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'GURU1234'])->assertStatus(404)->assertJsonPath('action', 'error');
+    expect(PresensiGuru::count())->toBe(0);
+});
+
+test('guru nonaktif ditolak', function () {
+    Carbon::setTestNow(Carbon::parse('2026-07-27 07:00', 'Asia/Jakarta'));
+    dataGuruPresensi(['aktif' => false]);
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'GURU1234'])->assertStatus(422)->assertJsonPath('action', 'error');
+    expect(PresensiGuru::count())->toBe(0);
+});
+
+test('hari libur menolak scan guru', function () {
+    Carbon::setTestNow(Carbon::parse('2026-08-02 07:00', 'Asia/Jakarta'));
+    dataGuruPresensi();
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'GURU1234'])->assertStatus(422)->assertJsonPath('action', 'error');
+    expect(PresensiGuru::count())->toBe(0);
+});
+
+test('scan siswa tetap menggunakan presensi siswa dan identitas kelas', function () {
+    Carbon::setTestNow(Carbon::parse('2026-07-27 07:00', 'Asia/Jakarta'));
+    $d = dataPresensi();
+    dataGuruPresensi();
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'AB12CD34'])->assertOk()
+        ->assertJsonPath('action', 'masuk')->assertJsonPath('data.jenis_pemilik', 'siswa')
+        ->assertJsonPath('data.nama', 'Siswa')->assertJsonPath('data.nis', DB::table('siswa')->where('id', $d['siswa'])->value('nis'))
+        ->assertJsonStructure(['data' => ['kelas']]);
+    expect(Presensi::count())->toBe(1)->and(PresensiGuru::count())->toBe(0);
+});
+
+test('semester aktif berubah tanpa menyalin rombel dan scan memilih anggota annual daripada snapshot', function () {
+    Carbon::setTestNow(Carbon::parse('2027-01-18 07:00', 'Asia/Jakarta'));
+    $admin = userPresensi('admin');
+    $d = dataPresensi();
+    DB::table('tahun_ajaran')->where('id', $d['ta'])->update(['semester' => 2]);
+    $snapshot = DB::table('rombel')->insertGetId(['nama' => 'Snapshot', 'tingkat' => '7', 'tahun_ajaran_id' => $d['ta'], 'semester' => 2]);
+    DB::table('rombel_siswa')->insert(['rombel_id' => $snapshot, 'siswa_id' => $d['siswa'], 'tanggal_masuk' => '2027-01-01']);
+
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'AB12CD34'])->assertOk()->assertJsonPath('action', 'masuk');
+    $this->assertDatabaseHas('presensi', ['siswa_id' => $d['siswa'], 'rombel_id' => $d['rombel'], 'tanggal' => '2027-01-18']);
+    $this->actingAs($admin)->get(route('presensi.index', ['tahun_ajaran_id' => $d['ta'], 'rombel_id' => $d['rombel'], 'tanggal' => '2027-01-18']))
+        ->assertOk()->assertViewHas('presensi_data', fn ($rows) => $rows->count() === 1);
+    $this->actingAs($admin)->get(route('presensi.index', ['tahun_ajaran_id' => $d['ta'], 'rombel_id' => $snapshot, 'tanggal' => '2027-01-18']))
+        ->assertOk()->assertViewHas('presensi_data', fn ($rows) => $rows->isEmpty());
+    $this->actingAs($admin)->post(route('presensi.store'), ['rombel_id' => $d['rombel'], 'tanggal' => '2027-01-18', 'presensi' => [$d['siswa'] => ['status' => 'hadir', 'waktu_masuk' => '07:00']]])
+        ->assertRedirect()->assertSessionDoesntHaveErrors();
+});
+
+test('snapshot semester lama tidak digunakan untuk scan atau presensi manual semester genap', function () {
+    Carbon::setTestNow(Carbon::parse('2027-01-18 07:00', 'Asia/Jakarta'));
+    $admin = userPresensi('admin');
+    $d = dataPresensi();
+    DB::table('rombel')->where('id', $d['rombel'])->update(['semester' => 1]);
+    DB::table('tahun_ajaran')->where('id', $d['ta'])->update(['semester' => 2]);
+
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'AB12CD34'])->assertStatus(422)->assertJsonPath('action', 'error');
+    $this->actingAs($admin)->post(route('presensi.store'), ['rombel_id' => $d['rombel'], 'tanggal' => '2027-01-18', 'presensi' => [$d['siswa'] => ['status' => 'hadir', 'waktu_masuk' => '07:00']]])->assertNotFound();
+    expect(Presensi::count())->toBe(0);
+});
+
+test('scan fallback ke snapshot semester yang sesuai bila annual belum berlaku pada tanggal scan', function () {
+    Carbon::setTestNow(Carbon::parse('2027-01-18 07:00', 'Asia/Jakarta'));
+    $d = dataPresensi();
+    DB::table('rombel_siswa')->where('rombel_id', $d['rombel'])->update(['tanggal_masuk' => '2027-02-01']);
+    $snapshot = DB::table('rombel')->insertGetId(['nama' => 'Genap', 'tingkat' => '7', 'tahun_ajaran_id' => $d['ta'], 'semester' => 2]);
+    DB::table('rombel_siswa')->insert(['rombel_id' => $snapshot, 'siswa_id' => $d['siswa'], 'tanggal_masuk' => '2027-01-01']);
+    DB::table('tahun_ajaran')->where('id', $d['ta'])->update(['semester' => 2]);
+
+    $this->postJson(route('presensi.scan'), ['kode_uid' => 'AB12CD34'])->assertOk()->assertJsonPath('action', 'masuk');
+    $this->assertDatabaseHas('presensi', ['siswa_id' => $d['siswa'], 'rombel_id' => $snapshot, 'tanggal' => '2027-01-18']);
+});
+
 test('presensi manual menolak jadwal nonaktif', function () {
     Carbon::setTestNow(Carbon::parse('2026-08-02 07:00', 'Asia/Jakarta'));
     $admin = userPresensi('admin');

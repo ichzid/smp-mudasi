@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="space-y-6">
-        <x-common.page-breadcrumb pageTitle="Data Kartu RFID" pageSubtitle="Kelola pendaftaran dan status kartu RFID siswa.">
+        <x-common.page-breadcrumb pageTitle="Data Kartu RFID" pageSubtitle="Kelola pendaftaran dan status kartu RFID siswa dan guru.">
             <x-slot:action>
                 <a href="{{ route('kartu-rfid.create') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -19,7 +19,7 @@
                     <thead>
                         <tr class="bg-gray-50 dark:bg-gray-900/50">
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 w-16">#</th>
-                            <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Siswa</th>
+                            <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Pemilik</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Kode UID (RFID)</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Status</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Tgl. Terbit</th>
@@ -35,8 +35,8 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                            @if($kartu->siswa->foto_url)
-                                                <img src="{{ Storage::url($kartu->siswa->foto_url) }}" alt="{{ $kartu->siswa->nama_lengkap }}" class="w-full h-full object-cover">
+                                            @if($kartu->siswa?->foto_url || $kartu->guru?->foto)
+                                                <img src="{{ Storage::url($kartu->siswa?->foto_url ?? $kartu->guru->foto) }}" alt="{{ $kartu->siswa?->nama_lengkap ?? $kartu->guru?->nama_lengkap }}" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center text-gray-500">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,8 +46,8 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $kartu->siswa->nama_lengkap }}</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $kartu->siswa->nisn }}</p>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $kartu->siswa?->nama_lengkap ?? $kartu->guru?->nama_lengkap }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $kartu->siswa_id ? 'Siswa · NISN: '.($kartu->siswa?->nisn ?? '-') : 'Guru · Identitas: '.($kartu->guru?->nomor_indentitas ?? '-') }}</p>
                                         </div>
                                     </div>
                                 </td>

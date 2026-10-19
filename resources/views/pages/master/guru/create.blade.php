@@ -16,12 +16,12 @@
                 @csrf
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- NIP -->
+                    <!-- Nomor Indentitas -->
                     <div>
-                        <label for="nip" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">NIP</label>
-                        <input type="text" id="nip" name="nip" value="{{ old('nip') }}" placeholder="Biarkan kosong jika non-PNS"
+                        <label for="nomor_indentitas" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Nomor Indentitas</label>
+                        <input type="text" id="nomor_indentitas" name="nomor_indentitas" value="{{ old('nomor_indentitas') }}" placeholder="Biarkan kosong jika non-PNS" maxlength="30"
                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-                        @error('nip')
+                        @error('nomor_indentitas')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
@@ -64,6 +64,63 @@
                         <input type="text" id="no_hp" name="no_hp" value="{{ old('no_hp') }}"
                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
                         @error('no_hp')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Tanggal Lahir -->
+                    <div>
+                        <label for="tanggal_lahir" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tanggal Lahir</label>
+                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        @error('tanggal_lahir')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Jabatan -->
+                    <div>
+                        <label for="jabatan" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Jabatan <span class="text-red-500">*</span></label>
+                        <input type="text" id="jabatan" name="jabatan" value="{{ old('jabatan', 'Guru') }}" required maxlength="255"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        @error('jabatan')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Bidang Tugas -->
+                    <div>
+                        <label for="bidang_tugas" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Bidang Tugas</label>
+                        <input type="text" id="bidang_tugas" name="bidang_tugas" value="{{ old('bidang_tugas') }}" maxlength="255"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        @error('bidang_tugas')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Urutan -->
+                    <div>
+                        <label for="urutan" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Urutan</label>
+                        <input type="number" id="urutan" name="urutan" value="{{ old('urutan', 0) }}" min="0"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        @error('urutan')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Aktif -->
+                    <div class="flex items-center gap-3 md:col-span-2">
+                        <input type="checkbox" id="aktif" name="aktif" value="1" {{ old('aktif', 1) ? 'checked' : '' }}
+                            class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-900">
+                        <label for="aktif" class="text-sm font-medium text-gray-700 dark:text-gray-400">Aktif</label>
+                    </div>
+
+                    <!-- Biografi Singkat -->
+                    <div class="md:col-span-2">
+                        <label for="biografi_singkat" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Biografi Singkat</label>
+                        <textarea id="biografi_singkat" name="biografi_singkat" rows="3"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">{{ old('biografi_singkat') }}</textarea>
+                        @error('biografi_singkat')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>

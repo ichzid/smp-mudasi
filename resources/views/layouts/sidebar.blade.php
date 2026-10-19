@@ -161,7 +161,7 @@
                                                 @foreach ($item['subItems'] as $subItem)
                                                     <li>
                                                         <a href="{{ $subItem['path'] }}" class="menu-dropdown-item"
-                                                            :class="isActive('{{ $subItem['path'] }}') ?
+                                                            :class="isActive('{{ $subItem['path'] }}', {{ !empty($subItem['exact']) ? 'true' : 'false' }}) ?
                                                                 'menu-dropdown-item-active' :
                                                                 'menu-dropdown-item-inactive'">
                                                             {{ $subItem['name'] }}

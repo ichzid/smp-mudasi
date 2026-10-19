@@ -13,15 +13,25 @@ class MasterDataSeeder extends Seeder
         DB::transaction(function (): void {
             DB::table('tahun_ajaran')->where('is_aktif', true)->update(['is_aktif' => false]);
             DB::table('tahun_ajaran')->updateOrInsert(
-                ['nama' => '2026/2027', 'semester' => 1],
-                ['is_aktif' => true, 'updated_at' => now(), 'created_at' => now()]
+                ['nama' => '2026/2027'],
+                ['semester' => 1, 'is_aktif' => true, 'updated_at' => now(), 'created_at' => now()]
             );
-            $tahunAjaranId = DB::table('tahun_ajaran')->where(['nama' => '2026/2027', 'semester' => 1])->value('id');
+            $tahunAjaranId = DB::table('tahun_ajaran')->where('nama', '2026/2027')->value('id');
 
-            foreach ($this->gurus() as [$nip, $nama]) {
+            foreach ($this->gurus() as [$nomorIndentitas, $nama, $tanggalLahir, $jabatan, $bidangTugas, $urutan]) {
                 DB::table('guru')->updateOrInsert(
-                    ['nip' => $nip],
-                    ['nama_lengkap' => $nama, 'jenis_kelamin' => (int) substr($nip, 6, 2) > 40 ? 'P' : 'L', 'updated_at' => now(), 'created_at' => now()]
+                    ['nomor_indentitas' => $nomorIndentitas],
+                    [
+                        'nama_lengkap' => $nama,
+                        'jenis_kelamin' => (int) substr($nomorIndentitas, 6, 2) > 40 ? 'P' : 'L',
+                        'tanggal_lahir' => $tanggalLahir,
+                        'jabatan' => $jabatan,
+                        'bidang_tugas' => $bidangTugas,
+                        'urutan' => $urutan,
+                        'aktif' => true,
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
                 );
             }
 
@@ -30,13 +40,11 @@ class MasterDataSeeder extends Seeder
             foreach ($wali as $tingkat => $namaWali) {
                 $guruId = DB::table('guru')->where('nama_lengkap', $namaWali)->value('id');
                 DB::table('rombel')->updateOrInsert(
-                    ['nama' => (string) $tingkat, 'tahun_ajaran_id' => $tahunAjaranId],
+                    ['nama' => (string) $tingkat, 'tahun_ajaran_id' => $tahunAjaranId, 'semester' => null],
                     ['tingkat' => (string) $tingkat, 'wali_guru_id' => $guruId, 'updated_at' => now(), 'created_at' => now()]
                 );
                 $rombelIds[$tingkat] = DB::table('rombel')->where(['nama' => (string) $tingkat, 'tahun_ajaran_id' => $tahunAjaranId])->value('id');
             }
-
-            DB::table('rombel_siswa')->whereIn('rombel_id', array_values($rombelIds))->delete();
 
             $perempuan = array_flip($this->namaSiswaPerempuan());
             foreach ($this->siswas() as [$nisn, $nama, $tanggalLahir, $tingkat]) {
@@ -53,23 +61,27 @@ class MasterDataSeeder extends Seeder
         });
     }
 
+    /**
+     * Data guru/pegawai hasil merge dari tabel `pegawai` (database sim_sekolah):
+     * nomor_identitas, nama, tanggal_lahir, jabatan, bidang_tugas, urutan.
+     */
     private function gurus(): array
     {
         return $this->csv(<<<'CSV'
-1209131904830003,KHOMSIN S.Kom
-1209205904840003,"SYAHIDDA SARI NASUTION, S.Pd"
-1209136312020001,"INTAN SUKMA NINGSI, S.Pd"
-1209136710010009,"SRI RIZKY DWI OKTARI, S.Ak"
-1209132711980001,"MA'SUM ALFANDI, S.Kom"
-1209134308010001,"WIDIA GUSNIATI, S.Pd"
-1209237003010001,"MUHAIRANI, S.Pd"
-1209236303010001,NILA SUSWITA
-1209232612640001,MULYADI
-1209200802690002,ABDILLAH
-1209130511020003,"EKA CAHYO RAMADHANI, S.M"
-1209200110030001,MHD. RIZKY ANANDA
-1220024210010003,DESI PITRIANI SIREGAR
-1209202809760004,ZULKARNAIN
+1209131904830003,KHOMSIN S.Kom,1984-04-09,Kepala Sekolah,,1
+1209205904840003,"SYAHIDDA SARI NASUTION, S.Pd",1984-04-19,Guru,BAHASA INGGRIS,2
+1209136312020001,"INTAN SUKMA NINGSI, S.Pd",2002-12-23,Guru,IPA DAN AGAMA ISLAM,3
+1209136710010009,"SRI RIZKY DWI OKTARI, S.Ak",2001-10-17,Tata Usaha,TATA USAHA,4
+1209132711980001,"MA'SUM ALFANDI, S.Kom",1998-11-27,Operator,OPERATOR,5
+1209134308010001,"WIDIA GUSNIATI, S.Pd",2001-08-03,Guru,BAHASA INDONESIA,6
+1209237003010001,"MUHAIRANI, S.Pd",2001-03-30,Guru,MATEMATIKA,7
+1209236303010001,NILA SUSWITA,2001-03-23,Guru,SENI BUDAYA DAN AGAMA ISLAM,8
+1209232612640001,MULYADI,1964-10-06,Guru,PENDIDIKAN KEWARGANEGARAAN,9
+1209200802690002,ABDILLAH,1969-02-08,Guru,KEMUHAMMADIYAAN,10
+1209130511020003,"EKA CAHYO RAMADHANI, S.M",2002-11-05,Guru,IPS DAN INFORMATIKA,11
+1209200110030001,MHD. RIZKY ANANDA,2003-10-01,Guru,TAPAK SUCI,12
+1220024210010003,DESI PITRIANI SIREGAR,2001-10-02,Guru,TAHFIDZ,13
+1209202809760004,ZULKARNAIN,1976-09-28,Guru,DRUMBAND,14
 CSV);
     }
 

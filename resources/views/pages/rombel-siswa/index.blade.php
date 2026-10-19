@@ -29,7 +29,7 @@
                             @foreach($tahun_ajarans as $ta)
                                 <option value="{{ $ta->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ (string) $tahun_ajaran_id === (string) $ta->id ? 'selected' : '' }}>
                                     {{ $ta->nama }} - Semester {{ $ta->semester == 1 ? 'Ganjil' : 'Genap' }}
-                                    {{ $ta->is_aktif ? '(Aktif)' : '' }}
+                                    {{ $ta->is_aktif ? '(Periode aktif)' : '(Arsip)' }}
                                 </option>
                             @endforeach
                         </select>
@@ -50,7 +50,7 @@
                             <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Kelas</option>
                             @foreach($rombels as $rombel)
                                 <option value="{{ $rombel->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ $rombel_id == $rombel->id ? 'selected' : '' }}>
-                                    {{ $rombel->kelas_label }}
+                                    {{ $rombel->kelas_label }} ({{ $rombel->semester === null ? 'Tahunan' : 'Snapshot ' . ($rombel->semester == 1 ? 'Ganjil' : 'Genap') }})
                                 </option>
                             @endforeach
                         </select>
@@ -73,8 +73,9 @@
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">
                             Anggota Kelas: {{ $rombels->where('id', $rombel_id)->first()?->kelas_label ?? '' }}
                         </h3>
-                        <p class="text-sm text-gray-500 mt-1">Anggota aktif: {{ $rombel_siswas->whereNull('tanggal_keluar')->count() }} siswa. Histori tetap ditampilkan.</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ $tahun_ajarans->firstWhere('id', $tahun_ajaran_id)?->is_aktif ? 'Periode aktif' : 'Arsip' }} · Anggota aktif: {{ $rombel_siswas->whereNull('tanggal_keluar')->count() }} siswa. Histori tetap ditampilkan.</p>
                     </div>
+                    @if($tahun_ajarans->firstWhere('id', $tahun_ajaran_id)?->is_aktif && $rombels->firstWhere('id', (int) $rombel_id)?->semester === null)
                     <div class="flex gap-3">
                         <a href="{{ route('rombel-siswa.create', ['rombel_id' => $rombel_id]) }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,6 +84,7 @@
                             Tambah Anggota Kelas
                         </a>
                     </div>
+                    @endif
                 </div>
 
                 <!-- Table -->
@@ -137,7 +139,7 @@
                                         {{ $rs->tanggal_keluar?->format('d M Y') ?? 'Aktif' }}
                                     </td>
                                     <td class="px-5 py-4 text-right">
-                                        @if($rs->tanggal_keluar === null)
+                                        @if($rs->tanggal_keluar === null && $tahun_ajarans->firstWhere('id', $tahun_ajaran_id)?->is_aktif && $rs->rombel->semester === null)
                                             <form action="{{ route('rombel-siswa.destroy', $rs->id) }}" method="POST" class="inline-flex items-center gap-2" onsubmit="return confirm('Tutup keanggotaan siswa ini? Histori tidak akan dihapus.');">
                                                 @csrf
                                                 @method('DELETE')

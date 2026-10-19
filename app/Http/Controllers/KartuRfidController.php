@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
 use App\Models\KartuRfid;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class KartuRfidController extends Controller
 {
@@ -15,14 +17,20 @@ class KartuRfidController extends Controller
     {
         $search = $request->input('search');
 
-        $query = KartuRfid::with('siswa')->latest();
+        $query = KartuRfid::with(['siswa', 'guru'])->latest();
 
         if ($search) {
-            $query->where('kode_uid', 'like', "%{$search}%")
-                ->orWhereHas('siswa', function ($q) use ($search) {
-                    $q->where('nama_lengkap', 'like', "%{$search}%")
-                        ->orWhere('nisn', 'like', "%{$search}%");
-                });
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_uid', 'like', "%{$search}%")
+                    ->orWhereHas('siswa', function ($siswa) use ($search) {
+                        $siswa->where('nama_lengkap', 'like', "%{$search}%")
+                            ->orWhere('nisn', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('guru', function ($guru) use ($search) {
+                        $guru->where('nama_lengkap', 'like', "%{$search}%")
+                            ->orWhere('nomor_indentitas', 'like', "%{$search}%");
+                    });
+            });
         }
 
         $kartu_rfids = $query->get();
@@ -35,9 +43,10 @@ class KartuRfidController extends Controller
      */
     public function create()
     {
-        $siswas = Siswa::doesntHave('kartuRfid')->orderBy('nama_lengkap')->get();
+        $siswas = Siswa::where('status', 'aktif')->doesntHave('kartuRfid')->orderBy('nama_lengkap')->get();
+        $gurus = Guru::where('aktif', true)->doesntHave('kartuRfid')->orderBy('nama_lengkap')->get();
 
-        return view('pages.kartu-rfid.create', compact('siswas'), ['title' => 'Tambah Kartu RFID']);
+        return view('pages.kartu-rfid.create', compact('siswas', 'gurus'), ['title' => 'Tambah Kartu RFID']);
     }
 
     /**
@@ -48,7 +57,8 @@ class KartuRfidController extends Controller
         $request->merge(['kode_uid' => strtoupper($request->input('kode_uid', ''))]);
 
         $validated = $request->validate([
-            'siswa_id' => 'required|exists:siswa,id|unique:kartu_rfid,siswa_id',
+            'siswa_id' => ['nullable', 'required_without:guru_id', Rule::prohibitedIf(fn () => $request->filled('guru_id')), Rule::exists('siswa', 'id')->where('status', 'aktif'), Rule::unique('kartu_rfid', 'siswa_id')],
+            'guru_id' => ['nullable', 'required_without:siswa_id', Rule::prohibitedIf(fn () => $request->filled('siswa_id')), Rule::exists('guru', 'id')->where('aktif', true), Rule::unique('kartu_rfid', 'guru_id')],
             'kode_uid' => ['required', 'string', 'min:4', 'max:32', 'regex:/^[A-Z0-9:-]+$/', 'unique:kartu_rfid,kode_uid'],
             'status' => 'required|in:aktif,nonaktif',
         ]);
@@ -65,7 +75,7 @@ class KartuRfidController extends Controller
      */
     public function show(string $id)
     {
-        $kartu = KartuRfid::with('siswa')->findOrFail($id);
+        $kartu = KartuRfid::with(['siswa', 'guru'])->findOrFail($id);
 
         return view('pages.kartu-rfid.show', compact('kartu'), ['title' => 'Detail Kartu RFID']);
     }
@@ -75,7 +85,7 @@ class KartuRfidController extends Controller
      */
     public function edit(string $id)
     {
-        $kartu = KartuRfid::with('siswa')->findOrFail($id);
+        $kartu = KartuRfid::with(['siswa', 'guru'])->findOrFail($id);
 
         return view('pages.kartu-rfid.edit', compact('kartu'), ['title' => 'Edit Kartu RFID']);
     }
@@ -89,7 +99,7 @@ class KartuRfidController extends Controller
         $request->merge(['kode_uid' => strtoupper($request->input('kode_uid', ''))]);
 
         $validated = $request->validate([
-            'kode_uid' => 'required|string|unique:kartu_rfid,kode_uid,'.$kartu->id,
+            'kode_uid' => ['required', 'string', 'min:4', 'max:32', 'regex:/^[A-Z0-9:-]+$/', Rule::unique('kartu_rfid', 'kode_uid')->ignore($kartu->id)],
             'status' => 'required|in:aktif,nonaktif',
         ]);
 
