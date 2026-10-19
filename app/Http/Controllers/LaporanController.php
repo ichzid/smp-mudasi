@@ -45,15 +45,16 @@ class LaporanController extends Controller
         $f = $request->validate(['tab' => ['nullable', 'in:harian,bulanan'], 'tahun_ajaran_id' => ['nullable', 'exists:tahun_ajaran,id'], 'rombel_id' => ['nullable', 'exists:rombel,id'], 'tanggal' => ['nullable', 'date_format:Y-m-d'], 'bulan' => ['nullable', 'date_format:Y-m'], 'status_pulang' => ['nullable', 'in:sudah_pulang,belum_pulang,pulang_cepat,lengkap']]);
         $tab = $f['tab'] ?? 'harian';
         $tahunAjaran = isset($f['tahun_ajaran_id']) ? TahunAjaran::find($f['tahun_ajaran_id']) : TahunAjaran::where('is_aktif', true)->first();
-        $rombels = $tahunAjaran ? $this->accessible($request, $tahunAjaran->id)->get() : collect();
+        $tanggal = $f['tanggal'] ?? now('Asia/Jakarta')->toDateString();
+        $bulan = $f['bulan'] ?? now('Asia/Jakarta')->format('Y-m');
+        $periode = $tab === 'harian' ? $tanggal : $bulan.'-01';
+        $rombels = $tahunAjaran ? $this->accessible($request, $tahunAjaran->id, $tahunAjaran->nama, $periode)->get() : collect();
         $rombel = isset($f['rombel_id']) ? $rombels->firstWhere('id', (int) $f['rombel_id']) : null;
         if (isset($f['rombel_id'])) {
             abort_unless($rombel, 403);
         }if ($required) {
             abort_unless($tahunAjaran && $rombel, 422);
-        }$tanggal = $f['tanggal'] ?? now('Asia/Jakarta')->toDateString();
-        $bulan = $f['bulan'] ?? now('Asia/Jakarta')->format('Y-m');
-        $status_pulang = $f['status_pulang'] ?? null;
+        }$status_pulang = $f['status_pulang'] ?? null;
         $rows = $rombel ? ($tab === 'harian' ? $this->daily($rombel, $tanggal, $status_pulang) : $this->monthly($rombel, $bulan)) : collect();
 
         return compact('tab', 'tahunAjaran', 'rombels', 'rombel', 'tanggal', 'bulan', 'status_pulang', 'rows') + ['tahunAjarans' => TahunAjaran::orderByDesc('nama')->get()];
@@ -63,10 +64,8 @@ class LaporanController extends Controller
     {
         $presensi = Presensi::where('rombel_id', $r->id)->whereDate('tanggal', $tanggal)->get()->keyBy('siswa_id');
 
-        return RombelSiswa::with('siswa')->where('rombel_id', $r->id)
-            ->whereDate('tanggal_masuk', '<=', $tanggal)
-            ->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhereDate('tanggal_keluar', '>=', $tanggal))
-            ->get()->map(function (RombelSiswa $anggota) use ($presensi, $r, $tanggal) {
+        return $this->anggota($r, $tanggal, $tanggal)->with('siswa')
+            ->get()->unique('siswa_id')->map(function (RombelSiswa $anggota) use ($presensi, $r, $tanggal) {
                 $item = $presensi->get($anggota->siswa_id) ?? new Presensi([
                     'siswa_id' => $anggota->siswa_id,
                     'rombel_id' => $r->id,
@@ -90,9 +89,7 @@ class LaporanController extends Controller
         $end = $start->copy()->endOfMonth();
         $presensi = Presensi::where('rombel_id', $r->id)->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])->get()->groupBy('siswa_id');
 
-        return RombelSiswa::with('siswa')->where('rombel_id', $r->id)
-            ->whereDate('tanggal_masuk', '<=', $end->toDateString())
-            ->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhereDate('tanggal_keluar', '>=', $start->toDateString()))
+        return $this->anggota($r, $start->toDateString(), $end->toDateString())->with('siswa')
             ->get()->unique('siswa_id')->map(function (RombelSiswa $anggota) use ($presensi) {
                 $records = $presensi->get($anggota->siswa_id, collect());
                 $row = (object) ['id' => $anggota->siswa->id, 'nis' => $anggota->siswa->nis, 'nama_lengkap' => $anggota->siswa->nama_lengkap];
@@ -107,8 +104,28 @@ class LaporanController extends Controller
             })->sortBy('nama_lengkap')->values();
     }
 
-    private function accessible(Request $request, int $ta): Builder
+    private function anggota(Rombel $rombel, string $start, string $end): Builder
     {
-        return Rombel::where('tahun_ajaran_id', $ta)->when($request->user()->role === 'wali_kelas', fn ($q) => $q->whereHas('waliGuru', fn ($g) => $g->where('user_id', $request->user()->id)))->orderBy('tingkat')->orderBy('nama');
+        return RombelSiswa::where('rombel_id', $rombel->id)
+            ->whereDate('tanggal_masuk', '<=', $end)
+            ->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhereDate('tanggal_keluar', '>=', $start))
+            ->when($rombel->semester !== null, fn ($q) => $q->whereNotExists(fn ($sub) => $sub->selectRaw('1')->from('rombel_siswa as annual_anggota')
+                ->join('rombel as annual_rombel', 'annual_rombel.id', '=', 'annual_anggota.rombel_id')
+                ->whereColumn('annual_anggota.siswa_id', 'rombel_siswa.siswa_id')
+                ->where('annual_rombel.tahun_ajaran_id', $rombel->tahun_ajaran_id)
+                ->whereNull('annual_rombel.semester')
+                ->whereDate('annual_anggota.tanggal_masuk', '<=', $end)
+                ->where(fn ($sub) => $sub->whereNull('annual_anggota.tanggal_keluar')->orWhereDate('annual_anggota.tanggal_keluar', '>=', $start))));
+    }
+
+    private function accessible(Request $request, int $ta, string $namaTahun, string $tanggal): Builder
+    {
+        $tahun = (int) substr($tanggal, 0, 4);
+        $semester = (int) substr($tanggal, 5, 2) >= 7 ? 1 : 2;
+        $nama = $semester === 1 ? $tahun.'/'.($tahun + 1) : ($tahun - 1).'/'.$tahun;
+
+        return Rombel::where('tahun_ajaran_id', $ta)
+            ->where(fn ($q) => $q->whereNull('semester')->when($namaTahun === $nama, fn ($q) => $q->orWhere('semester', $semester)))
+            ->when($request->user()->role === 'wali_kelas', fn ($q) => $q->whereHas('waliGuru', fn ($g) => $g->where('user_id', $request->user()->id)))->orderBy('tingkat')->orderBy('nama');
     }
 }

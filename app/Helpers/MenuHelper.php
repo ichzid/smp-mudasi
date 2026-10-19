@@ -31,10 +31,11 @@ class MenuHelper
                 'icon' => 'attendance',
                 'name' => 'Presensi',
                 'subItems' => [
-                    ['name' => 'Kartu RFID', 'path' => '/kartu-rfid', 'pro' => false],
-                    ['name' => 'Absen Kartu', 'path' => '/presensi/kiosk', 'pro' => false],
+                    ['name' => 'Presensi Kartu', 'path' => '/presensi/kiosk', 'pro' => false],
                     ['name' => 'Presensi Manual', 'path' => '/presensi', 'pro' => false],
-                    ['name' => 'Laporan Presensi', 'path' => '/laporan', 'pro' => false],
+                    ['name' => 'Laporan Presensi Murid', 'path' => '/laporan', 'pro' => false],
+                    ...(in_array(auth()->user()?->role, ['admin', 'tu'], true) ? [['name' => 'Laporan Presensi Guru', 'path' => '/laporan-guru', 'pro' => false]] : []),
+                    ['name' => 'Jadwal Presensi', 'path' => '/pengaturan-presensi', 'pro' => false],
                 ],
             ],
         ];
@@ -61,7 +62,7 @@ class MenuHelper
     {
         return [
             [
-                'title' => 'Beranda',
+                'title' => 'Dashboard',
                 'items' => [
                     [
                         'icon' => 'dashboard',
@@ -71,23 +72,7 @@ class MenuHelper
                 ],
             ],
             [
-                'title' => 'Operasional Presensi',
-                'items' => [
-                    [
-                        'icon' => 'kiosk',
-                        'name' => 'Absen Kartu',
-                        'path' => '/presensi/kiosk',
-                    ],
-                    [
-                        'icon' => 'attendance',
-                        'name' => 'Presensi Manual',
-                        'path' => '/presensi',
-                        'exact' => true,
-                    ],
-                ],
-            ],
-            [
-                'title' => 'Data Akademik',
+                'title' => 'Master Data',
                 'items' => [
                     [
                         'icon' => 'classroom',
@@ -103,12 +88,48 @@ class MenuHelper
                 ],
             ],
             [
-                'title' => 'Laporan',
+                'title' => 'Presensi',
+                'items' => [
+                    [
+                        'icon' => 'attendance',
+                        'name' => 'Presensi',
+                        'subItems' => [
+                            ['name' => 'Presensi Kartu', 'path' => '/presensi/kiosk'],
+                            ['name' => 'Presensi Manual', 'path' => '/presensi', 'exact' => true],
+                            ['name' => 'Laporan Presensi Murid', 'path' => '/laporan'],
+                            ...(in_array(auth()->user()?->role, ['admin', 'tu'], true) ? [['name' => 'Laporan Presensi Guru', 'path' => '/laporan-guru']] : []),
+                            ['name' => 'Jadwal Presensi', 'path' => '/pengaturan-presensi'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Pembayaran Sekolah',
                 'items' => [
                     [
                         'icon' => 'report',
-                        'name' => 'Laporan Presensi',
-                        'path' => '/laporan',
+                        'name' => 'Pembayaran Sekolah',
+                        'subItems' => [
+                            ['name' => 'Tarif Pembayaran', 'path' => '/pembayaran/tarif'],
+                            ['name' => 'Kasir Pembayaran', 'path' => '/pembayaran/kasir'],
+                            ['name' => 'Pemeriksaan Ujian', 'path' => '/pembayaran/ujian'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Kelola Website',
+                'items' => [
+                    [
+                        'icon' => 'pages',
+                        'name' => 'Kelola Website',
+                        'subItems' => [
+                            ['name' => 'Pengaturan Web', 'path' => '/website/pengaturan'],
+                            ['name' => 'Berita & Info', 'path' => '/website/berita'],
+                            ['name' => 'Fasilitas', 'path' => '/website/fasilitas'],
+                            ['name' => 'Ekstrakurikuler', 'path' => '/website/ekstrakurikuler'],
+                            ['name' => 'Galeri & Album', 'path' => '/website/galeri'],
+                        ],
                     ],
                 ],
             ],
@@ -119,11 +140,6 @@ class MenuHelper
                         'icon' => 'rfid',
                         'name' => 'Kartu RFID',
                         'path' => '/kartu-rfid',
-                    ],
-                    [
-                        'icon' => 'calendar',
-                        'name' => 'Jadwal Presensi',
-                        'path' => '/pengaturan-presensi',
                     ],
                 ],
             ],

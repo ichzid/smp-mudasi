@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
 use App\Models\JadwalPresensi;
 use App\Models\KartuRfid;
 use App\Models\Presensi;
+use App\Models\PresensiGuru;
 use App\Models\Rombel;
 use App\Models\RombelSiswa;
 use App\Models\Siswa;
@@ -24,14 +26,14 @@ class PresensiController extends Controller
         $tahun_ajarans = TahunAjaran::latest()->get();
         $tahun_ajaran_id = $filters['tahun_ajaran_id'] ?? optional($tahun_ajarans->firstWhere('is_aktif', true))->id;
         $rombel_id = $filters['rombel_id'] ?? null;
-        $rombels = $tahun_ajaran_id ? $this->accessibleRombels($request)->where('tahun_ajaran_id', $tahun_ajaran_id)->orderBy('tingkat')->orderBy('nama')->get() : collect();
+        $rombels = $tahun_ajaran_id ? $this->accessibleRombels($request, $tanggal)->where('tahun_ajaran_id', $tahun_ajaran_id)->orderBy('tingkat')->orderBy('nama')->get() : collect();
         if ($rombel_id && ! $rombels->contains('id', (int) $rombel_id)) {
             abort_if($request->user()->role === 'wali_kelas', 403);
         }
         $presensi_data = collect();
         if ($rombel_id && $rombels->contains('id', (int) $rombel_id)) {
             $existing = Presensi::where('rombel_id', $rombel_id)->whereDate('tanggal', $tanggal)->get()->keyBy('siswa_id');
-            $presensi_data = RombelSiswa::with('siswa')->where('rombel_id', $rombel_id)->whereHas('siswa', fn ($q) => $q->where('status', 'aktif'))->where('tanggal_masuk', '<=', $tanggal)->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhere('tanggal_keluar', '>=', $tanggal))->get()->map(function ($rs) use ($existing) {
+            $presensi_data = $this->anggotaRombel($rombels->firstWhere('id', (int) $rombel_id), $tanggal)->with('siswa')->whereHas('siswa', fn ($q) => $q->where('status', 'aktif'))->get()->unique('siswa_id')->map(function ($rs) use ($existing) {
                 $p = $existing->get($rs->siswa_id);
 
                 return (object) ['siswa' => $rs->siswa, 'status' => $p?->status, 'waktu_masuk' => $p?->waktu_masuk, 'metode_masuk' => $p?->metode_masuk, 'waktu_pulang' => $p?->waktu_pulang, 'status_pulang' => $p?->status_pulang, 'alasan_pulang_cepat' => $p?->alasan_pulang_cepat, 'catatan_pulang' => $p?->catatan_pulang];
@@ -56,11 +58,18 @@ class PresensiController extends Controller
         if (! $kartu) {
             return $this->scanError('Kartu tidak dikenali atau tidak aktif.', 404);
         }
+        if ($kartu->guru_id) {
+            return $this->scanGuru($kartu->guru_id, $now);
+        }
         $siswa = Siswa::whereKey($kartu->siswa_id)->where('status', 'aktif')->first();
         if (! $siswa) {
             return $this->scanError('Siswa tidak ditemukan atau tidak aktif.');
         }
-        $anggota = RombelSiswa::with('rombel')->where('siswa_id', $siswa->id)->where('tanggal_masuk', '<=', $tanggal)->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhere('tanggal_keluar', '>=', $tanggal))->whereHas('rombel.tahunAjaran', fn ($q) => $q->where('is_aktif', true))->latest('tanggal_masuk')->first();
+        $tahunAktif = TahunAjaran::where('is_aktif', true)->first();
+        $semester = $tahunAktif ? $this->semesterTanggal($tahunAktif->nama, $tanggal) : null;
+        $anggota = $tahunAktif ? RombelSiswa::with('rombel')->where('siswa_id', $siswa->id)->where('tanggal_masuk', '<=', $tanggal)->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhere('tanggal_keluar', '>=', $tanggal))
+            ->whereHas('rombel', fn ($q) => $q->where('tahun_ajaran_id', $tahunAktif->id)->where(fn ($q) => $q->whereNull('semester')->when($semester, fn ($q) => $q->orWhere('semester', $semester))))
+            ->orderByRaw('(select semester from rombel where rombel.id = rombel_siswa.rombel_id) IS NOT NULL')->latest('tanggal_masuk')->first() : null;
         if (! $anggota) {
             return $this->scanError('Siswa belum terdaftar di kelas pada Tahun Ajaran aktif.');
         }
@@ -104,14 +113,59 @@ class PresensiController extends Controller
         [$p,$action,$code] = $result;
         $messages = ['masuk' => 'Presensi masuk berhasil.', 'pulang' => 'Presensi pulang berhasil.', 'terlalu_awal' => 'Belum waktunya pulang. Jadwal pulang hari ini pukul '.substr($jadwal->jam_mulai_pulang, 0, 5).' WIB.', 'lengkap' => ! $p->waktu_masuk ? 'Presensi manual izin/sakit/alpa tidak dapat diproses melalui kiosk.' : 'Presensi hari ini sudah lengkap.'];
 
-        return response()->json(['success' => ! in_array($action, ['terlalu_awal'], true), 'action' => $action, 'type' => $action, 'message' => $messages[$action], 'data' => ['nama' => $siswa->nama_lengkap, 'nis' => $siswa->nis, 'foto_url' => $siswa->foto_url ? asset('storage/'.$siswa->foto_url) : null, 'kelas' => $anggota->rombel->kelas_label, 'waktu_masuk' => $p->waktu_masuk, 'waktu_pulang' => $p->waktu_pulang, 'status' => $p->status, 'status_pulang' => $p->status_pulang, 'jadwal_pulang' => $jadwal->jam_mulai_pulang, 'pesan' => $messages[$action]]], $code);
+        return response()->json(['success' => ! in_array($action, ['terlalu_awal'], true), 'action' => $action, 'type' => $action, 'message' => $messages[$action], 'data' => ['jenis_pemilik' => 'siswa', 'nama' => $siswa->nama_lengkap, 'nis' => $siswa->nis, 'foto_url' => $siswa->foto_url ? asset('storage/'.$siswa->foto_url) : null, 'kelas' => $anggota->rombel->kelas_label, 'waktu_masuk' => $p->waktu_masuk, 'waktu_pulang' => $p->waktu_pulang, 'status' => $p->status, 'status_pulang' => $p->status_pulang, 'jadwal_pulang' => $jadwal->jam_mulai_pulang, 'pesan' => $messages[$action]]], $code);
+    }
+
+    private function scanGuru(int $guruId, Carbon $now)
+    {
+        $guru = Guru::whereKey($guruId)->where('aktif', true)->first();
+        if (! $guru) {
+            return $this->scanError('Guru tidak ditemukan atau tidak aktif.');
+        }
+        $jadwal = $this->jadwal($now);
+        if (! $jadwal || ! $jadwal->is_aktif) {
+            return $this->scanError('Presensi tidak aktif pada hari ini.');
+        }
+        if (! $jadwal->jam_mulai_masuk || ! $jadwal->batas_terlambat || ! $jadwal->jam_mulai_pulang) {
+            Log::error('Jadwal presensi tidak lengkap', ['hari' => $now->isoWeekday()]);
+
+            return $this->scanError('Jadwal presensi hari ini belum lengkap. Hubungi Admin.');
+        }
+        try {
+            [$p, $action, $code] = DB::transaction(function () use ($guru, $jadwal, $now) {
+                Guru::whereKey($guru->id)->lockForUpdate()->firstOrFail();
+                $p = PresensiGuru::where('guru_id', $guru->id)->whereDate('tanggal', $now->toDateString())->lockForUpdate()->first();
+                $time = $now->format('H:i:s');
+                if (! $p) {
+                    $p = PresensiGuru::create(['guru_id' => $guru->id, 'tanggal' => $now->toDateString(), 'waktu_masuk' => $time, 'status' => $time <= $jadwal->batas_terlambat ? 'hadir' : 'terlambat', 'metode_masuk' => 'rfid']);
+
+                    return [$p, 'masuk', 200];
+                }
+                if ($p->waktu_pulang) {
+                    return [$p, 'lengkap', 200];
+                }
+                if ($time < $jadwal->jam_mulai_pulang) {
+                    return [$p, 'terlalu_awal', 422];
+                }
+                $p->update(['waktu_pulang' => $time, 'status_pulang' => 'tepat_waktu', 'metode_pulang' => 'rfid']);
+
+                return [$p, 'pulang', 200];
+            });
+        } catch (\Throwable $e) {
+            report($e);
+
+            return $this->scanError('Terjadi kesalahan sistem saat menyimpan presensi.', 500);
+        }
+        $messages = ['masuk' => 'Presensi masuk berhasil.', 'pulang' => 'Presensi pulang berhasil.', 'terlalu_awal' => 'Belum waktunya pulang. Jadwal pulang hari ini pukul '.substr($jadwal->jam_mulai_pulang, 0, 5).' WIB.', 'lengkap' => 'Presensi hari ini sudah lengkap.'];
+
+        return response()->json(['success' => $action !== 'terlalu_awal', 'action' => $action, 'type' => $action, 'message' => $messages[$action], 'data' => ['jenis_pemilik' => 'guru', 'nama' => $guru->nama_lengkap, 'jabatan' => $guru->jabatan, 'foto_url' => $guru->foto ? asset('storage/'.$guru->foto) : null, 'waktu_masuk' => $p->waktu_masuk, 'waktu_pulang' => $p->waktu_pulang, 'status' => $p->status, 'status_pulang' => $p->status_pulang, 'jadwal_pulang' => $jadwal->jam_mulai_pulang, 'pesan' => $messages[$action]]], $code);
     }
 
     public function store(Request $request)
     {
         $v = $request->validate(['rombel_id' => ['required', 'exists:rombel,id'], 'tanggal' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.Carbon::now('Asia/Jakarta')->toDateString()], 'presensi' => ['required', 'array'], 'presensi.*.status' => ['required', Rule::in(['hadir', 'terlambat', 'izin', 'sakit', 'alpa'])], 'presensi.*.waktu_masuk' => ['nullable', 'date_format:H:i'], 'presensi.*.waktu_pulang' => ['nullable', 'date_format:H:i'], 'presensi.*.status_pulang' => ['nullable', Rule::in(['tepat_waktu', 'pulang_cepat'])], 'presensi.*.alasan_pulang_cepat' => ['nullable', 'string', 'max:255'], 'presensi.*.catatan_pulang' => ['nullable', 'string', 'max:1000']]);
-        $rombel = $this->accessibleRombels($request)->findOrFail($v['rombel_id']);
-        $anggota = RombelSiswa::where('rombel_id', $rombel->id)->whereHas('siswa', fn ($q) => $q->where('status', 'aktif'))->where('tanggal_masuk', '<=', $v['tanggal'])->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhere('tanggal_keluar', '>=', $v['tanggal']))->pluck('siswa_id')->map(fn ($id) => (string) $id)->sort()->values();
+        $rombel = $this->accessibleRombels($request, $v['tanggal'])->findOrFail($v['rombel_id']);
+        $anggota = $this->anggotaRombel($rombel, $v['tanggal'])->whereHas('siswa', fn ($q) => $q->where('status', 'aktif'))->distinct()->pluck('siswa_id')->map(fn ($id) => (string) $id)->sort()->values();
         if (collect(array_keys($v['presensi']))->map(fn ($id) => (string) $id)->sort()->values()->all() !== $anggota->all()) {
             return back()->withErrors(['presensi' => 'Data presensi harus memuat seluruh siswa aktif anggota kelas.'])->withInput();
         }
@@ -197,8 +251,39 @@ class PresensiController extends Controller
         return response()->json(['success' => false, 'action' => 'error', 'type' => 'error', 'message' => $message], $code);
     }
 
-    private function accessibleRombels(Request $request)
+    private function semesterTanggal(string $nama, string $tanggal): ?int
     {
-        return Rombel::query()->when($request->user()->role === 'wali_kelas', fn ($q) => $q->whereHas('waliGuru', fn ($g) => $g->where('user_id', $request->user()->id)));
+        $tahun = (int) substr($tanggal, 0, 4);
+        $bulan = (int) substr($tanggal, 5, 2);
+
+        return match ($nama) {
+            $tahun.'/'.($tahun + 1) => $bulan >= 7 ? 1 : null,
+            ($tahun - 1).'/'.$tahun => $bulan <= 6 ? 2 : null,
+            default => null,
+        };
+    }
+
+    private function anggotaRombel(Rombel $rombel, string $tanggal)
+    {
+        return RombelSiswa::where('rombel_id', $rombel->id)
+            ->where('tanggal_masuk', '<=', $tanggal)
+            ->where(fn ($q) => $q->whereNull('tanggal_keluar')->orWhere('tanggal_keluar', '>=', $tanggal))
+            ->when($rombel->semester !== null, fn ($q) => $q->whereNotExists(fn ($sub) => $sub->selectRaw('1')->from('rombel_siswa as annual_anggota')
+                ->join('rombel as annual_rombel', 'annual_rombel.id', '=', 'annual_anggota.rombel_id')
+                ->whereColumn('annual_anggota.siswa_id', 'rombel_siswa.siswa_id')
+                ->where('annual_rombel.tahun_ajaran_id', $rombel->tahun_ajaran_id)
+                ->whereNull('annual_rombel.semester')
+                ->where('annual_anggota.tanggal_masuk', '<=', $tanggal)
+                ->where(fn ($sub) => $sub->whereNull('annual_anggota.tanggal_keluar')->orWhere('annual_anggota.tanggal_keluar', '>=', $tanggal))));
+    }
+
+    private function accessibleRombels(Request $request, string $tanggal)
+    {
+        $tahun = (int) substr($tanggal, 0, 4);
+        $semester = (int) substr($tanggal, 5, 2) >= 7 ? 1 : 2;
+        $nama = $semester === 1 ? $tahun.'/'.($tahun + 1) : ($tahun - 1).'/'.$tahun;
+
+        return Rombel::query()->where(fn ($q) => $q->whereNull('semester')->orWhere(fn ($q) => $q->where('semester', $semester)->whereHas('tahunAjaran', fn ($ta) => $ta->where('nama', $nama))))
+            ->when($request->user()->role === 'wali_kelas', fn ($q) => $q->whereHas('waliGuru', fn ($g) => $g->where('user_id', $request->user()->id)));
     }
 }

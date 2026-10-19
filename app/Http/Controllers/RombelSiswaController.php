@@ -54,6 +54,7 @@ class RombelSiswaController extends Controller
     {
         $rombel_id = $request->input('rombel_id');
         $rombel = Rombel::with('tahunAjaran')->findOrFail($rombel_id);
+        abort_unless($rombel->tahunAjaran->is_aktif && $rombel->semester === null, 403, 'Kelas arsip atau snapshot historis tidak dapat ditambah anggota.');
 
         $siswaAktifDiTahunAjaran = RombelSiswa::whereNull('tanggal_keluar')
             ->whereHas('rombel', function ($query) use ($rombel) {
@@ -81,7 +82,8 @@ class RombelSiswaController extends Controller
             'tanggal_masuk' => ['required', 'date'],
         ]);
 
-        $rombel = Rombel::findOrFail($validated['rombel_id']);
+        $rombel = Rombel::with('tahunAjaran')->findOrFail($validated['rombel_id']);
+        abort_unless($rombel->tahunAjaran->is_aktif && $rombel->semester === null, 403, 'Kelas arsip atau snapshot historis tidak dapat ditambah anggota.');
 
         DB::transaction(function () use ($validated, $rombel) {
             $siswaIds = collect($validated['siswa_id'])->map(fn ($id) => (int) $id)->unique()->values();
@@ -158,7 +160,8 @@ class RombelSiswaController extends Controller
         ]);
 
         $rombelSiswa = DB::transaction(function () use ($id, $validated) {
-            $anggota = RombelSiswa::with('rombel')->lockForUpdate()->findOrFail($id);
+            $anggota = RombelSiswa::with('rombel.tahunAjaran')->lockForUpdate()->findOrFail($id);
+            abort_unless($anggota->rombel->tahunAjaran->is_aktif && $anggota->rombel->semester === null, 403, 'Keanggotaan arsip atau snapshot historis tidak dapat ditutup.');
 
             if ($anggota->tanggal_keluar !== null) {
                 throw ValidationException::withMessages([

@@ -5,7 +5,7 @@
         <!-- Breadcrumb -->
         <x-common.page-breadcrumb 
             pageTitle="Tambah Kartu RFID" 
-            pageSubtitle="Hubungkan kartu RFID baru untuk siswa." 
+            pageSubtitle="Hubungkan kartu RFID baru untuk siswa atau guru."
             :breadcrumbs="[
                 ['label' => 'Data Kartu RFID', 'url' => route('kartu-rfid.index')]
             ]"
@@ -15,12 +15,24 @@
             <form action="{{ route('kartu-rfid.store') }}" method="POST" class="space-y-6">
                 @csrf
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Siswa -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ jenis: '{{ old('guru_id') ? 'guru' : 'siswa' }}' }">
                     <div class="md:col-span-2">
+                        <label for="jenis_pemilik" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Jenis Pemilik</label>
+                        <div class="relative">
+                            <select id="jenis_pemilik" x-model="jenis" class="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 pr-11 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                                <option value="siswa">Siswa</option>
+                                <option value="guru">Guru</option>
+                            </select>
+                            <span class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                                <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Siswa -->
+                    <div class="md:col-span-2" x-show="jenis === 'siswa'">
                         <label for="siswa_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Pilih Siswa <span class="text-red-500">*</span></label>
                         <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
-                            <select id="siswa_id" name="siswa_id" required
+                            <select id="siswa_id" name="siswa_id" x-bind:disabled="jenis !== 'siswa'" x-bind:required="jenis === 'siswa'"
                                 class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
                                 :class="isOptionSelected && 'text-gray-800 dark:text-white/90'" @change="isOptionSelected = true">
                                 <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">-- Pilih Siswa yang belum memiliki kartu --</option>
@@ -38,6 +50,26 @@
                         </div>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Hanya menampilkan siswa yang belum dihubungkan dengan kartu RFID.</p>
                         @error('siswa_id')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="md:col-span-2" x-show="jenis === 'guru'" x-cloak>
+                        <label for="guru_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Pilih Guru <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select id="guru_id" name="guru_id" x-bind:disabled="jenis !== 'guru'" x-bind:required="jenis === 'guru'"
+                                class="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 pr-11 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                                <option value="">-- Pilih Guru yang belum memiliki kartu --</option>
+                                @foreach($gurus as $guru)
+                                    <option value="{{ $guru->id }}" {{ old('guru_id') == $guru->id ? 'selected' : '' }}>{{ $guru->nama_lengkap }} ({{ $guru->nomor_indentitas }})</option>
+                                @endforeach
+                            </select>
+                            <span class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                                <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </span>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Hanya menampilkan guru aktif yang belum dihubungkan dengan kartu RFID.</p>
+                        @error('guru_id')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>

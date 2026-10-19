@@ -10,6 +10,7 @@ class KartuRfid extends Model
 
     protected $fillable = [
         'siswa_id',
+        'guru_id',
         'kode_uid',
         'status',
         'diterbitkan_pada',
@@ -22,5 +23,10 @@ class KartuRfid extends Model
     public function siswa()
     {
         return $this->belongsTo(Siswa::class);
+    }
+
+    public function guru()
+    {
+        return $this->belongsTo(Guru::class);
     }
 }

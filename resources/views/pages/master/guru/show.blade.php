@@ -41,7 +41,7 @@
                     <div class="flex-1 min-w-0">
                         <div class="mb-6">
                             <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $guru->nama_lengkap }}</h3>
-                            <p class="text-brand-500 font-medium mt-1">NIP: {{ $guru->nip ?: 'Non-PNS' }}</p>
+                            <p class="text-brand-500 font-medium mt-1">No. Indentitas: {{ $guru->nomor_indentitas ?: 'Non-PNS' }}</p>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">

@@ -33,9 +33,15 @@ class GuruController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nip' => 'nullable|string|unique:guru,nip',
+            'nomor_indentitas' => 'nullable|string|max:30|unique:guru,nomor_indentitas',
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
+            'tanggal_lahir' => 'nullable|date',
+            'jabatan' => 'required|string|max:255',
+            'bidang_tugas' => 'nullable|string|max:255',
+            'biografi_singkat' => 'nullable|string',
+            'urutan' => 'nullable|integer|min:0',
+            'aktif' => 'nullable|boolean',
             'no_hp' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ], [
@@ -43,6 +49,8 @@ class GuruController extends Controller
             'foto.mimes' => 'Foto harus berformat JPG, JPEG, atau PNG.',
             'foto.max' => 'Ukuran foto tidak boleh lebih dari 2 MB.',
         ]);
+
+        $validated['aktif'] = $request->boolean('aktif');
 
         if ($request->hasFile('foto')) {
             $fotoPath = $request->file('foto')->store('foto_guru', 'public');
@@ -82,9 +90,15 @@ class GuruController extends Controller
         $guru = Guru::findOrFail($id);
 
         $validated = $request->validate([
-            'nip' => 'nullable|string|unique:guru,nip,'.$guru->id,
+            'nomor_indentitas' => 'nullable|string|max:30|unique:guru,nomor_indentitas,'.$guru->id,
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
+            'tanggal_lahir' => 'nullable|date',
+            'jabatan' => 'required|string|max:255',
+            'bidang_tugas' => 'nullable|string|max:255',
+            'biografi_singkat' => 'nullable|string',
+            'urutan' => 'nullable|integer|min:0',
+            'aktif' => 'nullable|boolean',
             'no_hp' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ], [
@@ -92,6 +106,8 @@ class GuruController extends Controller
             'foto.mimes' => 'Foto harus berformat JPG, JPEG, atau PNG.',
             'foto.max' => 'Ukuran foto tidak boleh lebih dari 2 MB.',
         ]);
+
+        $validated['aktif'] = $request->boolean('aktif');
 
         if ($request->hasFile('foto')) {
             if ($guru->foto && Storage::disk('public')->exists($guru->foto)) {

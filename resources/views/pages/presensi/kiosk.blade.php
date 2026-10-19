@@ -177,7 +177,7 @@
             <div class="feature-pills" aria-label="Fitur perangkat">
                 <span class="feature-pill">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4-8 4-8-4 8-4zM6 9.5V15c0 1.7 2.7 3 6 3s6-1.3 6-3V9.5"/></svg>
-                    <span>Presensi Siswa</span>
+                    <span>Presensi Siswa &amp; Guru</span>
                 </span>
                 <span class="feature-pill">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3a4 4 0 014 4v2h1a2 2 0 012 2v8H5v-8a2 2 0 012-2h1V7a4 4 0 014-4zM9 9h6"/></svg>
@@ -189,7 +189,7 @@
                     <span class="ring"></span><span class="ring"></span><span class="ring"></span>
                     <svg class="rfid-icon" viewBox="0 0 64 64" fill="none"><rect x="21" y="14" width="22" height="36" rx="5" stroke="currentColor" stroke-width="3"/><path d="M14 22c-6 6-6 14 0 20M8 16C-1 25-1 39 8 48M50 22c6 6 6 14 0 20M56 16c9 9 9 23 0 32" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="32" r="4" fill="currentColor"/></svg>
                 </div>
-                <h1 id="scanner-title" x-text="headline">Tempelkan Kartu Pelajar</h1>
+                <h1 id="scanner-title" x-text="headline">Tempelkan Kartu RFID</h1>
                 <p class="instruction" x-text="instruction">Dekatkan kartu RFID ke alat pembaca. Presensi akan tercatat secara otomatis.</p>
             </div>
 
@@ -206,7 +206,7 @@
                 <template x-for="scan in recentScans" :key="scan.key"><li class="log-item">
                     <template x-if="scan.foto_url"><img class="avatar" :src="scan.foto_url" :alt="'Foto ' + scan.nama"></template>
                     <template x-if="!scan.foto_url"><span class="avatar" aria-hidden="true"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-8 9a8 8 0 0116 0H4z"/></svg></span></template>
-                    <div><div class="li-name" x-text="scan.nama"></div><div class="li-meta" x-text="scan.kelas + ' · ' + scan.waktu"></div></div>
+                    <div><div class="li-name" x-text="scan.nama"></div><div class="li-meta" x-text="(scan.jenis_pemilik === 'guru' ? scan.jabatan || 'Guru' : scan.kelas || '-') + ' · ' + scan.waktu"></div></div>
 
                 </li></template>
             </ul>
@@ -225,7 +225,7 @@ function kioskData() {
         get isProcessing() { return this.scannerState === 'processing'; },
         get isLocked() { return this.isProcessing || this.modalActive; },
         get statusLabel() { return { ready:'Siap tempel', processing:'Membaca kartu', success:'Presensi berhasil', error:'Pemindaian gagal' }[this.scannerState]; },
-        get headline() { return { ready:'Tempelkan Kartu Pelajar', processing:'Kartu Sedang Dibaca', success:'Presensi Tercatat', error:'Kartu Belum Terbaca' }[this.scannerState]; },
+        get headline() { return { ready:'Tempelkan Kartu RFID', processing:'Kartu Sedang Dibaca', success:'Presensi Tercatat', error:'Kartu Belum Terbaca' }[this.scannerState]; },
         get instruction() { if (!this.isOnline) return 'Perangkat sedang offline. Periksa koneksi sebelum memindai kembali.'; return this.scannerState === 'processing' ? 'Mohon tunggu dan jangan tempelkan kartu lain.' : 'Dekatkan kartu RFID ke alat pembaca, lalu tunggu hingga hasil tampil.'; },
         init() {
             this.updateClock(); setInterval(() => this.updateClock(), 1000);
@@ -266,10 +266,10 @@ function kioskData() {
         buildResultContent(data) {
             const card=document.createElement('div'); card.className='kiosk-result-card';
             const photo=document.createElement('div'); photo.className='kiosk-result-photo';
-            if (data.foto_url) { const image=document.createElement('img'); image.src=data.foto_url; image.alt=`Foto ${data.nama || 'siswa'}`; photo.append(image); } else { photo.textContent='👤'; photo.setAttribute('aria-hidden','true'); }
+            if (data.foto_url) { const image=document.createElement('img'); image.src=data.foto_url; image.alt=`Foto ${data.nama || (data.jenis_pemilik === 'guru' ? 'guru' : 'siswa')}`; photo.append(image); } else { photo.textContent='👤'; photo.setAttribute('aria-hidden','true'); }
             const details=document.createElement('div');
-            const name=document.createElement('div'); name.className='kiosk-result-name'; name.textContent=data.nama || 'Siswa';
-            const meta=document.createElement('div'); meta.className='kiosk-result-meta'; meta.textContent=`${data.kelas || '-'} · ${data.waktu || '-'}`;
+            const name=document.createElement('div'); name.className='kiosk-result-name'; name.textContent=data.nama || (data.jenis_pemilik === 'guru' ? 'Guru' : 'Siswa');
+            const meta=document.createElement('div'); meta.className='kiosk-result-meta'; meta.textContent=`${data.jenis_pemilik === 'guru' ? data.jabatan || 'Guru' : data.kelas || '-'} · ${data.waktu || '-'}`;
             const status=document.createElement('div'); status.className='kiosk-result-status'; status.textContent=data.pesan || (data.status === 'terlambat' ? 'Presensi terlambat tercatat' : 'Presensi berhasil tercatat');
             details.append(name,meta,status); card.append(photo,details); return card;
         },
@@ -287,7 +287,7 @@ function kioskData() {
             this.scannerState='error'; this.feedbackMsg=message; this.resultData=null; this.modalActive=true;
             await Swal.fire({icon:'error',title:'Presensi Gagal',text:message,confirmButtonText:'Tutup',timer:2000,timerProgressBar:true,allowOutsideClick:false,allowEscapeKey:true,customClass:{popup:'kiosk-result-popup'}});
         },
-        addToRecentLog(data) { const scan={key:data.nis+'-'+Date.now(),id:data.nis,nama:data.nama,kelas:data.kelas,waktu:data.waktu,status:data.status,action:data.action,foto_url:data.foto_url}; this.recentScans.unshift(scan); this.recentScans=this.recentScans.slice(0,6); },
+        addToRecentLog(data) { const scan={key:(data.nis || data.nama)+'-'+Date.now(),nama:data.nama,jenis_pemilik:data.jenis_pemilik,kelas:data.kelas,jabatan:data.jabatan,waktu:data.waktu,status:data.status,action:data.action,foto_url:data.foto_url}; this.recentScans.unshift(scan); this.recentScans=this.recentScans.slice(0,6); },
         resetScanner() { this.modalActive=false; this.scannerState='ready'; this.feedbackMsg=''; this.resultData=null; this.rfidCode=''; this.restoreFocus(); }
     }
 }

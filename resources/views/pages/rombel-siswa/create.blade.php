@@ -12,7 +12,7 @@
             <div>
                 <p class="text-sm font-medium text-brand-600 dark:text-brand-400 mb-1">Menambahkan siswa ke:</p>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ $rombel->kelas_label }}</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Tahun Ajaran: {{ $rombel->tahunAjaran->nama }} - Semester {{ $rombel->tahunAjaran->semester == 1 ? 'Ganjil' : 'Genap' }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Tahun Ajaran: {{ $rombel->tahunAjaran->nama }} - Semester {{ $rombel->tahunAjaran->semester == 1 ? 'Ganjil' : 'Genap' }} (Periode aktif)</p>
             </div>
             <a href="{{ route('rombel-siswa.index', ['tahun_ajaran_id' => $rombel->tahun_ajaran_id, 'rombel_id' => $rombel->id]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-all">
                 Batal & Kembali

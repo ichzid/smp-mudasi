@@ -32,7 +32,7 @@
                         <tr class="bg-gray-50 dark:bg-gray-900/50">
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 w-16">#</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Tahun Ajaran</th>
-                            <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Semester</th>
+                            <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Semester Aktif</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Status</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 text-right w-24" data-orderable="false">Aksi</th>
                         </tr>

@@ -15,7 +15,7 @@ class TahunAjaranController extends Controller
      */
     public function index()
     {
-        $tahunAjarans = TahunAjaran::orderBy('nama', 'desc')->orderBy('semester', 'desc')->get();
+        $tahunAjarans = TahunAjaran::orderBy('nama', 'desc')->get();
 
         return view('pages.master.tahun-ajaran.index', compact('tahunAjarans'), ['title' => 'Data Tahun Ajaran']);
     }
@@ -38,7 +38,7 @@ class TahunAjaranController extends Controller
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('tahun_ajaran')->where(fn ($query) => $query->where('semester', $request->input('semester'))),
+                Rule::unique('tahun_ajaran', 'nama'),
             ],
             'semester' => 'required|in:1,2',
             'is_aktif' => 'required|boolean',
@@ -93,7 +93,7 @@ class TahunAjaranController extends Controller
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('tahun_ajaran')->where(fn ($query) => $query->where('semester', $request->input('semester')))->ignore($tahunAjaran->id),
+                Rule::unique('tahun_ajaran', 'nama')->ignore($tahunAjaran->id),
             ],
             'semester' => 'required|in:1,2',
             'is_aktif' => 'required|boolean',
@@ -128,6 +128,11 @@ class TahunAjaranController extends Controller
 
         if ($tahunAjaran->is_aktif) {
             return redirect()->route('master.tahun-ajaran.index')->with('error', 'Tidak dapat menghapus tahun ajaran yang sedang aktif.');
+        }
+
+        if (DB::table('rombel')->where('tahun_ajaran_id', $id)->exists() ||
+            DB::table('tarif_pembayaran')->where('tahun_ajaran_id', $id)->exists()) {
+            return redirect()->route('master.tahun-ajaran.index')->with('error', 'Tahun ajaran yang memiliki kelas atau tarif tidak dapat dihapus karena memiliki riwayat terkait.');
         }
 
         $tahunAjaran->delete();

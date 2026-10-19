@@ -32,7 +32,7 @@
                         <tr class="bg-gray-50 dark:bg-gray-900/50">
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 w-16">#</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">Nama Guru</th>
-                            <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">NIP</th>
+                            <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">No. Indentitas</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">L/P</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400">No HP</th>
                             <th class="px-5 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 text-right w-32" data-orderable="false">Aksi</th>
@@ -63,7 +63,7 @@
                                     </div>
                                 </td>
                                 <td class="px-5 py-4 text-sm text-gray-900 dark:text-gray-300">
-                                    {{ $guru->nip ?: '-' }}
+                                    {{ $guru->nomor_indentitas ?: '-' }}
                                 </td>
                                 <td class="px-5 py-4 text-sm text-gray-900 dark:text-gray-300">
                                     {{ $guru->jenis_kelamin }}

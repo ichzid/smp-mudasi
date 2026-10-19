@@ -12,8 +12,11 @@ class Rombel extends Model
         'nama',
         'tingkat',
         'tahun_ajaran_id',
+        'semester',
         'wali_guru_id',
     ];
+
+    protected $casts = ['semester' => 'integer'];
 
     public function getLabelAttribute(): string
     {

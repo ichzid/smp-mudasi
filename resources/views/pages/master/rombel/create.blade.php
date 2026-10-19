@@ -81,7 +81,7 @@
                                 <option value="" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Pilih Wali Kelas</option>
                                 @foreach($gurus as $guru)
                                     <option value="{{ $guru->id }}" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400" {{ old('wali_guru_id') == $guru->id ? 'selected' : '' }}>
-                                        {{ $guru->nama_lengkap }} ({{ $guru->nip ?: 'Non-NIP' }})
+                                        {{ $guru->nama_lengkap }} ({{ $guru->nomor_indentitas ?: 'Non-NIP' }})
                                     </option>
                                 @endforeach
                             </select>

@@ -17,6 +17,25 @@ it('melindungi seluruh route laporan dengan auth dan role laporan', function () 
     }
 });
 
+it('laporan snapshot hanya berlaku pada semester tanggal dan arsip lama tetap tersedia', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $ta = DB::table('tahun_ajaran')->insertGetId(['nama' => '2026/2027', 'semester' => 2, 'is_aktif' => true]);
+    $lama = DB::table('rombel')->insertGetId(['nama' => 'Lama', 'tingkat' => '7', 'tahun_ajaran_id' => $ta, 'semester' => 1]);
+    $baru = DB::table('rombel')->insertGetId(['nama' => 'Baru', 'tingkat' => '7', 'tahun_ajaran_id' => $ta, 'semester' => 2]);
+    $siswa = DB::table('siswa')->insertGetId(['nis' => 'laporan-snapshot', 'nama_lengkap' => 'Siswa Arsip', 'jenis_kelamin' => 'L', 'status' => 'aktif']);
+    DB::table('rombel_siswa')->insert([
+        ['rombel_id' => $lama, 'siswa_id' => $siswa, 'tanggal_masuk' => '2026-07-01'],
+        ['rombel_id' => $baru, 'siswa_id' => $siswa, 'tanggal_masuk' => '2027-01-01'],
+    ]);
+
+    $this->actingAs($admin)->get(route('laporan.index', ['tahun_ajaran_id' => $ta, 'rombel_id' => $lama, 'tanggal' => '2026-10-18']))
+        ->assertOk()->assertSee('Siswa Arsip');
+    $this->get(route('laporan.index', ['tahun_ajaran_id' => $ta, 'rombel_id' => $lama, 'tanggal' => '2027-01-18']))->assertForbidden();
+    $this->get(route('laporan.index', ['tahun_ajaran_id' => $ta, 'rombel_id' => $baru, 'tab' => 'bulanan', 'bulan' => '2027-01']))
+        ->assertOk()->assertSee('Siswa Arsip');
+    $this->get(route('laporan.index', ['tahun_ajaran_id' => $ta, 'rombel_id' => $lama, 'tab' => 'bulanan', 'bulan' => '2027-01']))->assertForbidden();
+});
+
 it('laporan harian dan bulanan menyertakan anggota tanpa presensi', function () {
     $admin = User::create(['name' => 'Admin', 'username' => 'admin_laporan', 'email' => 'laporan@test.id', 'password' => Hash::make(fake()->password(12)), 'role' => 'admin']);
     $ta = DB::table('tahun_ajaran')->insertGetId(['nama' => '2026/2027', 'semester' => 1, 'is_aktif' => true]);

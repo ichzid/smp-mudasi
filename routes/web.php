@@ -4,10 +4,15 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JadwalPresensiController;
 use App\Http\Controllers\KartuRfidController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\LaporanGuruController;
 use App\Http\Controllers\Master\GuruController;
 use App\Http\Controllers\Master\RombelController;
+use App\Http\Controllers\Master\SalinRombelController;
 use App\Http\Controllers\Master\SiswaController;
 use App\Http\Controllers\Master\TahunAjaranController;
+use App\Http\Controllers\Pembayaran\KasirController;
+use App\Http\Controllers\Pembayaran\PemeriksaanUjianController;
+use App\Http\Controllers\Pembayaran\TarifController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\RombelSiswaController;
 use Illuminate\Http\Request;
@@ -28,16 +33,36 @@ Route::middleware('auth')->group(function () {
             Route::resource('siswa', SiswaController::class);
             Route::resource('tahun-ajaran', TahunAjaranController::class);
             Route::resource('guru', GuruController::class);
+            Route::get('kelas/salin', [SalinRombelController::class, 'create'])->name('rombel.salin.create');
+            Route::post('kelas/salin', [SalinRombelController::class, 'store'])->name('rombel.salin.store');
             Route::resource('kelas', RombelController::class)
                 ->parameters(['kelas' => 'rombel'])
                 ->names('rombel');
         });
+
+        Route::get('laporan-guru', [LaporanGuruController::class, 'index'])->name('laporan-guru.index');
+        Route::get('laporan-guru/csv', [LaporanGuruController::class, 'csv'])->name('laporan-guru.csv');
+        Route::get('laporan-guru/print', [LaporanGuruController::class, 'print'])->name('laporan-guru.print');
 
         Route::resource('kartu-rfid', KartuRfidController::class)->except(['show']);
         Route::resource('anggota-kelas', RombelSiswaController::class)
             ->parameters(['anggota-kelas' => 'rombel_siswa'])
             ->names('rombel-siswa')
             ->except(['show', 'edit', 'update']);
+
+        Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
+            Route::get('tarif', [TarifController::class, 'index'])->name('tarif.index');
+            Route::post('tarif', [TarifController::class, 'store'])->middleware('role:admin')->name('tarif.store');
+            Route::put('tarif/{tarif}', [TarifController::class, 'update'])->middleware('role:admin')->name('tarif.update');
+
+            Route::get('kasir', [KasirController::class, 'index'])->name('kasir.index');
+            Route::match(['get', 'post'], 'kasir/cari', [KasirController::class, 'cari'])->middleware('throttle:60,1')->name('kasir.cari');
+            Route::post('kasir/bayar', [KasirController::class, 'bayar'])->name('kasir.bayar');
+            Route::get('kasir/kuitansi/{transaksi}', [KasirController::class, 'kuitansi'])->name('kasir.kuitansi');
+
+            Route::get('ujian', [PemeriksaanUjianController::class, 'index'])->name('ujian.index');
+            Route::post('ujian/cek', [PemeriksaanUjianController::class, 'cek'])->middleware('throttle:60,1')->name('ujian.cek');
+        });
     });
 
     Route::middleware('role:admin,tu,wali_kelas')->group(function () {
@@ -84,4 +109,31 @@ Route::middleware('auth')->group(function () {
     Route::get('/buttons', fn () => view('pages.ui-elements.buttons', ['title' => 'Buttons']))->name('buttons');
     Route::get('/image', fn () => view('pages.ui-elements.images', ['title' => 'Images']))->name('images');
     Route::get('/videos', fn () => view('pages.ui-elements.videos', ['title' => 'Videos']))->name('videos');
+
+    // Web CMS Routes
+    Route::prefix('website')->name('website.')->group(function () {
+        Route::get('/pengaturan', [\App\Http\Controllers\Website\PengaturanController::class, 'edit'])->name('pengaturan.edit');
+        Route::post('/pengaturan', [\App\Http\Controllers\Website\PengaturanController::class, 'update'])->name('pengaturan.update');
+
+        Route::resource('berita', \App\Http\Controllers\Website\BeritaController::class)->except(['show']);
+        Route::resource('kategori-berita', \App\Http\Controllers\Website\KategoriBeritaController::class)
+            ->parameters(['kategori-berita' => 'kategoriBeritum'])
+            ->except(['show']);
+        Route::resource('fasilitas', \App\Http\Controllers\Website\FasilitasController::class)
+            ->parameters(['fasilitas' => 'fasilitas'])
+            ->except(['show']);
+        Route::resource('fasilitas.foto', \App\Http\Controllers\Website\FotoFasilitasController::class)
+            ->parameters(['fasilitas' => 'fasilitas', 'foto' => 'fotoFasilitas'])
+            ->only(['destroy']);
+        Route::resource('ekstrakurikuler', \App\Http\Controllers\Website\EkstrakurikulerController::class)->except(['show']);
+        Route::resource('galeri', \App\Http\Controllers\Website\GaleriController::class)->except(['show']);
+        Route::resource('galeri.foto', \App\Http\Controllers\Website\FotoGaleriController::class)
+            ->parameters(['foto' => 'fotoGaleri'])
+            ->only(['destroy']);
+    });
+
+    // Fallback route untuk halaman yang belum dibuat
+    Route::get('/website/{any}', function () {
+        return view('pages.coming-soon');
+    })->where('any', '.*');
 });
